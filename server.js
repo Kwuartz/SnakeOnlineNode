@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const http = require("http").Server(app);
 const path = require("path");
-const port = 3000;
+const port = process.env.PORT || 3000;
 const { instrument } = require("@socket.io/admin-ui");
 const io = require("socket.io")(http, {
   cors: {
@@ -30,7 +30,7 @@ const players = [];
 const usernames = [];
 let game;
 
-app.use(express.static(path.resolve("server", "../..") + "/"));
+app.use(express.static(__dirname + "/public/"));
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
