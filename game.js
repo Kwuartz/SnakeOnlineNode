@@ -16,9 +16,6 @@ function createGameState() {
     foodPos: [
       { x: 10, y: 10 },
       { x: 30, y: 30 },
-      { x: 50, y: 50 },
-      { x: 70, y: 70 },
-      { x: 90, y: 90 },
     ],
     gridSize: GRIDSIZE,
   };

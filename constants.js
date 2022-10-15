@@ -1,5 +1,5 @@
-const GRIDSIZE = 100;
-const FPS = 15;
+const GRIDSIZE = 40;
+const FPS = 6;
 const COLOURS = [
   "blue",
   "yellow",

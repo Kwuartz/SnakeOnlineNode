@@ -3,8 +3,8 @@ const gameBoard = document.getElementById("game");
 const bgColour = "#008ab8";
 const foodColour = "#FF0000";
 
-const FPS = 15;
-const GRIDSIZE = 100;
+const FPS = 6;
+const GRIDSIZE = 40;
 
 let context, canvas, game;
 
