@@ -1,4 +1,5 @@
 const { GRIDSIZE } = require("./constants");
+const { COLOURS } = require("./constants")
 
 module.exports = {
   createGameState,
@@ -35,6 +36,7 @@ function createNewPlayer() {
     ],
     dead: false,
     newSegments: 0,
+    snakeColour: randomColour()
   };
 }
 
@@ -183,4 +185,9 @@ function generateFood(game) {
   }
   game.foodPos = newFoodPos
   return game
+}
+
+function randomColour() {
+  let colour = COLOURS[Math.floor(Math.random()*COLOURS.length)];
+  return colour
 }

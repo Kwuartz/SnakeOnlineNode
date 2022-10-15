@@ -2,7 +2,6 @@ const socket = io();
 const gameBoard = document.getElementById("game");
 const bgColour = "#008ab8";
 const foodColour = "#FF0000";
-const snakeColour = "#f56f16";
 
 const FPS = 7;
 const GRIDSIZE = 50;
@@ -43,7 +42,7 @@ function drawGame(game) {
 
 function drawSnake(snake, size) {
   snake.segments.forEach((segment, _) => {
-    context.fillStyle = snakeColour;
+    context.fillStyle = snake.snakeColour;
     context.fillRect(segment.x * size, segment.y * size, size, size);
   });
 }
