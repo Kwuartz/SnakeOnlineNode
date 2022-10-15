@@ -1,5 +1,7 @@
+const { Socket } = require("socket.io");
+const { io } = require("socket.io-client");
 const { GRIDSIZE } = require("./constants");
-const { COLOURS } = require("./constants")
+const { COLOURS } = require("./constants");
 
 module.exports = {
   createGameState,
@@ -12,9 +14,11 @@ function createGameState() {
   return {
     players: {},
     foodPos: [
-      {x: 10, y: 11},
-      {x: 20, y: 20},
-      {x: 30, y: 30}
+      { x: 10, y: 10 },
+      { x: 30, y: 30 },
+      { x: 50, y: 50 },
+      { x: 70, y: 70 },
+      { x: 90, y: 90 },
     ],
     gridSize: GRIDSIZE,
   };
@@ -37,22 +41,21 @@ function createNewPlayer() {
     ],
     dead: false,
     newSegments: 0,
-    snakeColour: randomColour()
+    snakeColour: randomColour(),
   };
 }
 
-function gameLoop(game) {
+function gameLoop(game, io) {
   let segment,
     segments,
     headPos,
     player,
     players,
     isHead,
-    nextPos,
     foodPos,
     newSegment;
   players = game.players;
-  foodPos = game.foodPos
+  foodPos = game.foodPos;
   // Moves the players snakes and adds new segments
   for (playerName in players) {
     player = players[playerName];
@@ -92,8 +95,7 @@ function gameLoop(game) {
       // Checks if players hits into themselves
       segments = player.segments;
       headPos = player.headPos;
-      for (segmentIndex in segments) {
-        segment = segments[segmentIndex];
+      segments.forEach((segment, segmentIndex) => {
         isHead = segmentIndex == segments.length - 1;
         if (
           isHead == false &&
@@ -102,10 +104,9 @@ function gameLoop(game) {
         ) {
           player.dead = true;
         }
-      }
+      });
 
       // Check if player hit into another snake
-      nextPos = segments[segments.length - 2];
       oponents = Object.keys(players);
       for (oponentIndex in oponents) {
         oponentName = oponents[oponentIndex];
@@ -113,21 +114,16 @@ function gameLoop(game) {
 
         oponentSegments = game.players[oponentName].segments;
         if (isPlayer == false) {
-          for (oponentSegmentIndex in oponentSegments) {
+          oponentSegments.forEach((oponentSegment, oponentSegmentIndex) => {
             oponentSegment = oponentSegments[oponentSegmentIndex];
             if (
-              (headPos &&
-                headPos.x == oponentSegment.x &&
-                headPos.y == oponentSegment.y) ||
-              (nextPos &&
-                nextPos.x == oponentSegment.x &&
-                nextPos.y == oponentSegment.y)
+              headPos &&
+              headPos.x == oponentSegment.x &&
+              headPos.y == oponentSegment.y
             ) {
-              for (segmentIndex in segments) {
-                player.dead = true;
-              }
+              player.dead = true;
             }
-          }
+          });
         }
       }
 
@@ -142,13 +138,12 @@ function gameLoop(game) {
       }
 
       // Check if player is on food
-      for (foodIndex in foodPos) {
-        food = foodPos[foodIndex];
+      foodPos.forEach((food, foodIndex) => {
         if (headPos.x == food.x && headPos.y == food.y) {
           player.newSegments += 3;
-          game = generateFood(game, foodIndex)
+          game = generateFood(game, food);
         }
-      }
+      });
 
       // Kills player
       if (player.dead == true) {
@@ -181,16 +176,22 @@ function addSegment(player, segment) {
   return player;
 }
 
-function generateFood(game, foodIndex) {
-  let newFoodPos = {x: ((Math.round(Math.random()  * (GRIDSIZE - 2)) + 1)), y: ((Math.round(Math.random() * (GRIDSIZE - 2))) +1)}
-  if (newFoodPos.x == game.foodPos[foodIndex].x && newFoodPos.y == game.foodPos[foodIndex].y) {
-    newFoodPos = {x: ((Math.round(Math.random() * (GRIDSIZE - 1)))), y: ((Math.round(Math.random() * (GRIDSIZE - 1))) +1)}
+function generateFood(game, food) {
+  let newFoodPos = {
+    x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
+    y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
+  };
+  if (newFoodPos.x == food.x && newFoodPos.y == food.y) {
+    newFoodPos = {
+      x: Math.round(Math.random() * (GRIDSIZE - 1)),
+      y: Math.round(Math.random() * (GRIDSIZE - 1)) + 1,
+    };
   }
-  game.foodPos[foodIndex] = newFoodPos
-  return game
+  game.foodPos[game.foodPos.indexOf(food)] = newFoodPos;
+  return game;
 }
 
 function randomColour() {
-  let colour = COLOURS[Math.floor(Math.random()*COLOURS.length)];
-  return colour
+  let colour = COLOURS[Math.floor(Math.random() * COLOURS.length)];
+  return colour;
 }

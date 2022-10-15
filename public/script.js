@@ -9,11 +9,17 @@ const GRIDSIZE = 100;
 let context, canvas, game;
 
 let lastDirectionChange = 0;
-let delay = 500 / FPS;
+let delay = 1000 / FPS;
 
-let userName = "";
+let userName;
 
 socket.emit("new-player", prompt("Please enter your username!", "YourName")); // Temporary
+
+function sleep(milliseconds){
+  return new Promise(resolve => {
+      setTimeout(resolve, milliseconds);
+  });
+}
 
 function resetBoard() {
   context.fillStyle = bgColour;
@@ -93,7 +99,19 @@ socket.on("username-taken"),
 
 socket.on("new-gamestate", (gamestate) => {
   game = gamestate;
-  if (canvas) {
-    requestAnimationFrame(() => drawGame(game));
+  if (canvas && game.players[userName]) {
+    if (game.players[userName].dead == false) {
+      requestAnimationFrame(() => drawGame(game));
+    } else {
+      socket.emit("player-death", userName)
+    }
   }
 });
+
+socket.on("player-died", () => {
+  alert("You died!")
+  sleep(1000)
+  alert("Respawning in 3 seconds!")
+  sleep(3000)
+  socket.emit("new-player", userName)
+}) 
