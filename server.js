@@ -37,6 +37,10 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
 
+app.get("/test", (req, res) => {
+  res.sendFile(__dirname + '/public/test.html');
+});
+
 http.listen(port, () => {
   console.log("Listening on port: " + port);
 });

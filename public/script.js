@@ -9,7 +9,7 @@ const GRIDSIZE = 40;
 let context, canvas, game;
 
 let lastDirectionChange = 0;
-let delay = 750 / FPS;
+let delay = 500 / FPS;
 
 let userName;
 
