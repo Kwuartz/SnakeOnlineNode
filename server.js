@@ -11,6 +11,7 @@ const io = require("socket.io")(http, {
       "http://localhost:3000",  
       "http://127.0.0.1:5500",
       "https://admin.socket.io",
+      "https://snake-online-dan.herokuapp.com"
     ],
     credentials: true,
   },
