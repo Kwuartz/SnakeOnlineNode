@@ -11,10 +11,11 @@ module.exports = {
 function createGameState() {
   return {
     players: {},
-    foodPos: {
-      x: 9,
-      y: 9,
-    },
+    foodPos: [
+      {x: 10, y: 11},
+      {x: 20, y: 20},
+      {x: 30, y: 30}
+    ],
     gridSize: GRIDSIZE,
   };
 }
@@ -51,7 +52,7 @@ function gameLoop(game) {
     foodPos,
     newSegment;
   players = game.players;
-
+  foodPos = game.foodPos
   // Moves the players snakes and adds new segments
   for (playerName in players) {
     player = players[playerName];
@@ -141,10 +142,12 @@ function gameLoop(game) {
       }
 
       // Check if player is on food
-      foodPos = game.foodPos;
-      if (headPos.x == foodPos.x && headPos.y == foodPos.y) {
-        player.newSegments += 3;
-        game = generateFood(game)
+      for (foodIndex in foodPos) {
+        food = foodPos[foodIndex];
+        if (headPos.x == food.x && headPos.y == food.y) {
+          player.newSegments += 3;
+          game = generateFood(game, foodIndex)
+        }
       }
 
       // Kills player
@@ -178,12 +181,12 @@ function addSegment(player, segment) {
   return player;
 }
 
-function generateFood(game) {
-  let newFoodPos = {x: ((Math.round(Math.random() * (GRIDSIZE - 1)))), y: ((Math.round(Math.random() * (GRIDSIZE - 1))) +1)}
-  if (newFoodPos.x == game.foodPos.x && newFoodPos.y == game.foodPos.y) {
+function generateFood(game, foodIndex) {
+  let newFoodPos = {x: ((Math.round(Math.random()  * (GRIDSIZE - 2)) + 1)), y: ((Math.round(Math.random() * (GRIDSIZE - 2))) +1)}
+  if (newFoodPos.x == game.foodPos[foodIndex].x && newFoodPos.y == game.foodPos[foodIndex].y) {
     newFoodPos = {x: ((Math.round(Math.random() * (GRIDSIZE - 1)))), y: ((Math.round(Math.random() * (GRIDSIZE - 1))) +1)}
   }
-  game.foodPos = newFoodPos
+  game.foodPos[foodIndex] = newFoodPos
   return game
 }
 

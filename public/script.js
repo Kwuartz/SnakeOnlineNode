@@ -30,10 +30,13 @@ function drawGame(game) {
   resetBoard();
 
   const size = canvas.width / GRIDSIZE;
-  const food = game.foodPos;
+  const foodPos = game.foodPos;
 
   context.fillStyle = foodColour;
-  context.fillRect(food.x * size, food.y * size, size, size);
+  for (foodIndex in foodPos) {
+    food = game.foodPos[foodIndex];
+    context.fillRect(food.x * size, food.y * size, size, size);
+  }
 
   for (snake in game.players) {
     drawSnake(game.players[snake], size);
