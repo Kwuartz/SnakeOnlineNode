@@ -11,3 +11,30 @@ body {
     margin: auto;
     display: flex;
 }
+
+#chat-container {
+  text-align: left;
+  align-items: left;
+  align-self: left;
+  align-content: left;
+  justify-content: left;
+  justify-items: left;
+  position: absolute;
+  background-color: white;
+}
+
+#chat-box {
+
+}
+
+#chat-send {
+
+}
+
+#chat-input {
+
+}
+
+#messages {
+  border: 1px solid;
+}
