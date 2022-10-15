@@ -1,4 +1,4 @@
-const socket = io("localhost:3000");
+const socket = io();
 const gameBoard = document.getElementById("game");
 const bgColour = "#008ab8";
 const foodColour = "#FF0000";
