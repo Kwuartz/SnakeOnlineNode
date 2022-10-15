@@ -47,7 +47,7 @@ function drawGame(game) {
   for (snake in game.players) {
     drawSnake(game.players[snake], size);
     context.fillStyle = "white";
-    context.fillText(snake, (game.players[snake].headPos.x - 1) * size, (game.players[snake].headPos.y) * size);
+    context.fillText(snake, (game.players[snake].headPos.x) * size, (game.players[snake].headPos.y) * size);
   }
 }
 
