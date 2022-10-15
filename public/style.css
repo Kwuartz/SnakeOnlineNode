@@ -1,0 +1,13 @@
+body {
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    overflow: hidden;
+}
+
+#game {
+    height: 100vmin;
+    width: 100vmin;
+    margin: auto;
+    display: flex;
+}
