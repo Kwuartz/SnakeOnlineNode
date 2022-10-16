@@ -136,8 +136,8 @@ socket.on("player-died", () => {
   Swal.fire({
     titleText: "Respawning...",
     html: 'You will respawn in <timer></timer> seconds.',
-    timer: 3000,
-    timerprogressbar: true,
+    timer: 3500,
+    timerProgressBar: true,
     allowEscapeKey: false,
     allowOutsideClick: false,
     didOpen: () => {
@@ -145,7 +145,7 @@ socket.on("player-died", () => {
       const respawnTimer = Swal.getHtmlContainer().querySelector('timer')
       timerInterval = setInterval(() => {
         respawnTimer.textContent = Math.round(Swal.getTimerLeft()/1000)
-      }, 200)
+      }, 100)
     },
     willClose: () => {
       clearInterval(timerInterval)
