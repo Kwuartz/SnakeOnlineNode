@@ -136,7 +136,7 @@ socket.on("player-died", () => {
   Swal.fire({
     titleText: "Respawning...",
     html: 'You will respawn in <timer></timer> seconds.',
-    timer: 2000,
+    timer: 3000,
     timerprogressbar: true,
     allowEscapeKey: false,
     allowOutsideClick: false,
