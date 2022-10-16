@@ -13,7 +13,29 @@ let delay = 500 / FPS;
 
 let userName;
 
-socket.emit("new-player", prompt("Please enter your username!", "YourName")); // Temporary
+Swal.fire({
+  titleText: "Submit your username!",
+  inputPlaceholder: "Enter your username",
+  html: `<input type="text" id="username" class="swal2-input" placeholder="Enter your username!">`,
+  inputAttributes: {
+    autocapitalize: "off",
+    autocorrect: "off",
+    maxLength: 20,
+  },
+  confirmButtonText: 'Play',
+  showLoaderOnConfirm: true,
+  allowEscapeKey: false,
+  allowOutsideClick: false,
+  preConfirm: () => {
+    const username = Swal.getPopup().querySelector('#username').value
+    if (!username) {
+      Swal.showValidationMessage("Your username cannot be blank!")
+    }
+    return {username:username};
+  }
+}).then((result) => {
+  socket.emit("new-player", result.value.username);
+})
 
 function sleep(milliseconds){
   return new Promise(resolve => {
@@ -111,9 +133,24 @@ socket.on("new-gamestate", (gamestate) => {
 });
 
 socket.on("player-died", () => {
-  alert("You died!")
-  sleep(1000)
-  alert("Respawning in 3 seconds!")
-  sleep(3000)
-  socket.emit("new-player", userName)
+  Swal.fire({
+    titleText: "Respawning...",
+    html: 'You will respawn in <timer></timer> seconds.',
+    timer: 2000,
+    timerprogressbar: true,
+    allowEscapeKey: false,
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading()
+      const respawnTimer = Swal.getHtmlContainer().querySelector('timer')
+      timerInterval = setInterval(() => {
+        respawnTimer.textContent = Swal.getTimerLeft()/1000
+      }, 100)
+    },
+    willClose: () => {
+      clearInterval(timerInterval)
+    }
+  }).then((result) => {
+    socket.emit("new-player", userName)
+  })
 }) 

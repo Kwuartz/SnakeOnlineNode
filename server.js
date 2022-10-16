@@ -65,9 +65,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    const userName = players[socket.id]
-    delete game.players[userName];
-    delete players[socket.id];
+    if (game) {
+      const userName = players[socket.id]
+      delete game.players[userName];
+      delete players[socket.id];
+    }
     console.log("Player " + socket.id + " disconnected")
   });
 
