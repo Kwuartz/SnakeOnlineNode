@@ -28,7 +28,6 @@ const { changeDirection } = require("./game");
 const { gameLoop } = require("./game");
 
 const players = [];
-const usernames = []; // Useless right now
 let game;
 
 app.use(express.static(__dirname + "/public/"));
@@ -53,21 +52,23 @@ io.on("connection", (socket) => {
       game = createGameState();
       startGameInterval(game);
     }
-    if (usernames.includes(userName)) { // Useless right now
-      console.log("Player tried to join with existing username!");
-      socket.emit("username-taken");
-    } else {
-      players[socket.id] = userName;
-      usernames[userName] = socket.id; // Useless right now
-      console.log(userName + " has connected!");
-      socket.emit("player-connected", userName);
-      game.players[userName] = createNewPlayer();
-    }
+    players[socket.id] = userName;
+    console.log(userName + " has connected!");
+    socket.emit("player-connected", userName);
+    game.players[userName] = createNewPlayer();
   });
+
   socket.on("change-direction", (direction) => {
-    userName = players[socket.id];
+    const userName = players[socket.id];
     let player = game.players[userName];
     player = changeDirection(direction, game, player);
+  });
+
+  socket.on("disconnect", () => {
+    const userName = players[socket.id]
+    delete game.players[userName];
+    delete players[socket.id];
+    console.log("Player " + socket.id + " disconnected")
   });
 
   // Kills player when they have died
