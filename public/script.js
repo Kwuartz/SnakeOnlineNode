@@ -144,8 +144,8 @@ socket.on("player-died", () => {
       Swal.showLoading()
       const respawnTimer = Swal.getHtmlContainer().querySelector('timer')
       timerInterval = setInterval(() => {
-        respawnTimer.textContent = Swal.getTimerLeft()/1000
-      }, 100)
+        respawnTimer.textContent = Math.round(Swal.getTimerLeft()/1000)
+      }, 200)
     },
     willClose: () => {
       clearInterval(timerInterval)
