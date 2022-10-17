@@ -9,7 +9,7 @@ const GRIDSIZE = 40;
 let context, canvas, game;
 
 let lastDirectionChange = 0;
-let delay = 500 / FPS;
+let delay = 899 / FPS;
 
 let userName;
 
@@ -51,7 +51,7 @@ function resetBoard() {
 function init() {
   canvas = document.getElementById("canvas");
   context = canvas.getContext("2d");
-  canvas.width = canvas.height = 1000;
+  canvas.width = canvas.height = 600;
 }
 
 function drawGame(game) {
@@ -101,13 +101,12 @@ window.addEventListener("keydown", (event) => {
     lastDirectionChange = Date.now();
     if (movementDirection) {
       socket.emit("change-direction", movementDirection);
-      console.log("Movement key pressed!");
     }
   }
 });
 
 socket.on("player-connected", (playerName) => {
-  console.log("Player connected!");
+  console.log("Player spawned!");
   userName = playerName;
   init();
 });

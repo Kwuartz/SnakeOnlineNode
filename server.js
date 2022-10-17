@@ -1,8 +1,7 @@
 const express = require('express');
 const app = express();
 const http = require("http").Server(app);
-const path = require("path");
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 const { instrument } = require("@socket.io/admin-ui");
 const io = require("socket.io")(http, {
   cors: {
@@ -60,8 +59,10 @@ io.on("connection", (socket) => {
 
   socket.on("change-direction", (direction) => {
     const userName = players[socket.id];
-    let player = game.players[userName];
-    player = changeDirection(direction, game, player);
+    if (game.players) {
+      let player = game.players[userName]; 
+      player = changeDirection(direction, game, player);
+    }
   });
 
   socket.on("disconnect", () => {
@@ -78,6 +79,11 @@ io.on("connection", (socket) => {
     userName = players[socket.id]
     delete game.players[userName];
     socket.emit("player-died")
+  })
+
+  socket.on("chat-message", (message) => {
+    console.log("message sent")
+    socket.emit("message-recieved", message);
   })
 });
 

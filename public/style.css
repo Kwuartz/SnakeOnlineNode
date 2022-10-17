@@ -1,40 +1,16 @@
+/* going to use bootstrap */
+
 body {
-    width: 100vw;
-    height: 100vh;
+    width: 95vw;
+    height: 95vh;
     background-color: black;
     overflow: hidden;
 }
 
 #game {
-    height: 100vmin;
-    width: 100vmin;
+    height: 95vmin;
+    width: 95vmin;
     margin: auto;
     display: flex;
 }
 
-#chat-container {
-  text-align: left;
-  align-items: left;
-  align-self: left;
-  align-content: left;
-  justify-content: left;
-  justify-items: left;
-  position: absolute;
-  background-color: white;
-}
-
-#chat-box {
-
-}
-
-#chat-send {
-
-}
-
-#chat-input {
-
-}
-
-#messages {
-  border: 1px solid;
-}
