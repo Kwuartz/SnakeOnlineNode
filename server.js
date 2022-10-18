@@ -35,7 +35,7 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
 
-app.get("/test", (req, res) => {
+app.get("/chat", (req, res) => {
   res.sendFile(__dirname + '/public/test.html');
 });
 
@@ -82,7 +82,6 @@ io.on("connection", (socket) => {
   })
 
   socket.on("chat-message", (message) => {
-    console.log("message sent")
     socket.emit("message-recieved", message);
   })
 });
