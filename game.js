@@ -137,7 +137,7 @@ function gameLoop(game, io) {
       // Check if player is on food
       foodPos.forEach((food, foodIndex) => {
         if (headPos.x == food.x && headPos.y == food.y) {
-          player.newSegments += 100;
+          player.newSegments += 3;
           game = generateFood(game, food);
         }
       });

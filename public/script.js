@@ -139,6 +139,8 @@ socket.on("player-died", () => {
     timerProgressBar: true,
     allowEscapeKey: false,
     allowOutsideClick: false,
+    height: "20vh",
+    width: "20vw",
     didOpen: () => {
       Swal.showLoading()
       const respawnTimer = Swal.getHtmlContainer().querySelector('timer')
