@@ -4,12 +4,14 @@ const bgColour = "#008ab8";
 const foodColour = "#FF0000";
 
 const FPS = 6;
-const GRIDSIZE = 40;
 
 let context, canvas, game;
 
 let lastDirectionChange = 0;
 let delay = 899 / FPS;
+
+let eat = new Audio("sounds/eat.mp3")
+let death = new Audio("sounds/death.mp3")
 
 let userName;
 
@@ -46,6 +48,7 @@ function sleep(milliseconds){
 function resetBoard() {
   context.fillStyle = bgColour;
   context.fillRect(0, 0, canvas.width, canvas.height);
+  context.textAlign = "center";
 }
 
 function init() {
@@ -57,7 +60,7 @@ function init() {
 function drawGame(game) {
   resetBoard();
 
-  const size = canvas.width / GRIDSIZE;
+  const size = canvas.width / game.gridSize;
   const foodPos = game.foodPos;
 
   context.fillStyle = foodColour;
@@ -66,10 +69,13 @@ function drawGame(game) {
     context.fillRect(food.x * size, food.y * size, size, size);
   }
 
-  for (snake in game.players) {
-    drawSnake(game.players[snake], size);
+  for (username in game.players) {
+    let snake = game.players[username]
+    drawSnake(game.players[username], size);
     context.fillStyle = "white";
-    context.fillText(snake, (game.players[snake].headPos.x) * size, (game.players[snake].headPos.y) * size);
+    context.fillText(username, (snake.headPos.x + 0.5) * size, snake.headPos.y * size);
+    context.textAlign = "left"
+    context.fillText("Score: " + (snake.segments.length - 3), size, size)
   }
 }
 
@@ -93,6 +99,10 @@ function getKeys(key) {
     default:
       return false;
   }
+}
+
+function playSound(sound) {
+
 }
 
 window.addEventListener("keydown", (event) => {
@@ -126,7 +136,11 @@ socket.on("new-gamestate", (gamestate) => {
     if (game.players[userName].dead == false) {
       requestAnimationFrame(() => drawGame(game));
     } else {
+      death.play()
       socket.emit("player-death", userName)
+    }
+    if (game.players[userName].newSegments == 3) {
+      eat.play()
     }
   }
 });
@@ -139,8 +153,7 @@ socket.on("player-died", () => {
     timerProgressBar: true,
     allowEscapeKey: false,
     allowOutsideClick: false,
-    height: "20vh",
-    width: "20vw",
+    width: "25vw",
     didOpen: () => {
       Swal.showLoading()
       const respawnTimer = Swal.getHtmlContainer().querySelector('timer')

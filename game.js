@@ -1,6 +1,4 @@
-const { Socket } = require("socket.io");
-const { io } = require("socket.io-client");
-const { GRIDSIZE } = require("./constants");
+  const { GRIDSIZE } = require("./constants");
 const { COLOURS } = require("./constants");
 
 module.exports = {
@@ -42,7 +40,7 @@ function createNewPlayer() {
   };
 }
 
-function gameLoop(game, io) {
+function gameLoop(game) {
   let segment,
     segments,
     headPos,
