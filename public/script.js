@@ -1,14 +1,11 @@
 const socket = io();
 const gameBoard = document.getElementById("game");
-const bgColour = "#008ab8";
 const foodColour = "#FF0000";
-
-const FPS = 6;
 
 let context, canvas, game;
 
 let lastDirectionChange = 0;
-let delay = 899 / FPS;
+let delay
 
 let eat = new Audio("sounds/eat.mp3")
 let death = new Audio("sounds/death.mp3")
@@ -46,7 +43,7 @@ function sleep(milliseconds){
 }
 
 function resetBoard() {
-  context.fillStyle = bgColour;
+  context.fillStyle = game.bg;
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.textAlign = "center";
 }
@@ -109,11 +106,13 @@ function playSound(sound) {
 }
 
 window.addEventListener("keydown", (event) => {
-  movementDirection = getKeys(event.key);
-  if (lastDirectionChange < Date.now() - delay) {
-    lastDirectionChange = Date.now();
-    if (movementDirection) {
-      socket.emit("change-direction", movementDirection);
+  if (game) {
+    movementDirection = getKeys(event.key);
+    if (lastDirectionChange < Date.now() - delay) {
+      lastDirectionChange = Date.now();
+      if (movementDirection) {
+        socket.emit("change-direction", movementDirection);
+      }
     }
   }
 });
@@ -126,7 +125,6 @@ socket.on("player-connected", (playerName) => {
 });
 
 socket.on("player-respawned", () => {
-  socket.emit("server-message", userName + " has respawned!");
   init();
 });
 
@@ -152,6 +150,8 @@ socket.on("new-gamestate", (gamestate) => {
     if (game.players[userName].newSegments == 3) {
       eat.play()
     }
+
+    delay = 900 / game.fps
   }
 });
 

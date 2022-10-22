@@ -19,11 +19,11 @@ body {
   color: white;
 }
 
-
 #game {
   height: 100vmin;
   width: 100vmin;
   padding: 1vmin;
+  margin: auto;
 }
 
 

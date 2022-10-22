@@ -92,6 +92,12 @@ io.on("connection", (socket) => {
 
   socket.on("chat-message", (message) => {
     username = players[socket.id]
+    if (message == "party") {
+      game.party = true
+    } else if (message == "stop party") {
+      game.party = false
+      game.bg = "#008ab8"
+    }
     io.emit("message-recieved", message, username);
   })
 
@@ -105,7 +111,34 @@ function noop() {}
 function startGameInterval() {
   startGameInterval = noop;
   const interval = setInterval(() => {
-    game = gameLoop(game, io);
+    game = gameLoop(game);
     io.emit("new-gamestate", game);
-  }, 1000 / FPS);
+    if (game.party == true) {
+      clearInterval(interval)
+      partyInterval()
+    }
+  }, 1000 / game.fps);
+}
+
+function partyInterval() {
+  const interval = setInterval(() => {
+    game = gameLoop(game);
+    io.emit("new-gamestate", game);
+    if (game.party == false) {
+      clearInterval(interval)
+      defaultInterval()
+    }
+  }, 1000 / (game.fps * 4));
+}
+
+function defaultInterval() {
+  const interval = setInterval(() => {
+    game = gameLoop(game);
+    io.emit("new-gamestate", game);
+    if (game.party == true) {
+      game.fps = FPS * 4
+    } else {
+      game.fps = FPS
+    }
+  }, 1000 / game.fps);
 }

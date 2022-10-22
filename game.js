@@ -1,4 +1,5 @@
-  const { GRIDSIZE } = require("./constants");
+const { FPS } = require("./constants");
+const { GRIDSIZE } = require("./constants");
 const { COLOURS } = require("./constants");
 
 module.exports = {
@@ -18,6 +19,9 @@ function createGameState() {
       { x: 0, y: 0 },
     ],
     gridSize: GRIDSIZE,
+    fps: FPS,
+    party: false,
+    bg: "#008ab8"
   };
 }
 
@@ -153,6 +157,10 @@ function gameLoop(game) {
         console.log(playerName + " has died");
       }
     }
+  }
+
+  if (game.party) {
+    game.bg = randomColour()
   }
   return game;
 }
