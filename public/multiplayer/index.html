@@ -9,14 +9,18 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.1.9/sweetalert2.all.min.js" integrity="sha512-IZ95TbsPTDl3eT5GwqTJH/14xZ2feLEGJRbII6bRKtE/HC6x3N4cHye7yyikadgAsuiddCY2+6gMntpVHL1gHw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <link rel="stylesheet" type="text/css" href="style.css">
   <title>Snake Game</title>
+  <link rel="icon" href="../assets/icon.png" type="image/icon type">
 </head>
 <body>
   <div id="wrapper">
     <div id="chat-container">
-      <form id="chat-form">
-        <input type="text" id="chat-input">
-        <button type="submit" id="chat-send">Send</button>
-      </form>
+      <div id="message-container"></div>
+      <div>
+        <form id="chat-form">
+          <input type="text" id="chat-input">
+          <button type="submit" id="chat-send">Send</button>
+        </form>
+      </div>
     </div>
     <div id="game">
       <canvas id="canvas" ></canvas>

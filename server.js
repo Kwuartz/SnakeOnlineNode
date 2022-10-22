@@ -32,11 +32,15 @@ let game;
 app.use(express.static(__dirname + "/public/"));
 
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+  res.sendFile(__dirname + '/public/main/index.html');
 });
 
-app.get("/chat", (req, res) => {
-  res.sendFile(__dirname + '/public/test.html');
+app.get("/multiplayer", (req, res) => {
+  res.sendFile(__dirname + '/public/multiplayer/index.html');
+});
+
+app.get("/singleplayer", (req, res) => {
+  res.sendFile(__dirname + '/public/singleplayer/index.html');
 });
 
 http.listen(port, () => {

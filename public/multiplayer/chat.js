@@ -1,6 +1,6 @@
 const chatInput = document.getElementById("chat-input")
 const chatForm = document.getElementById("chat-form")
-const chatContainer = document.getElementById("chat-container")
+const messageContainer = document.getElementById("message-container")
 
 chatForm.addEventListener('submit', (event) => {
   event.preventDefault();
@@ -20,5 +20,5 @@ socket.on("message-recieved", (message, username) => {
   } else {
     messageElement.innerText = message;
   }
-  chatContainer.appendChild(messageElement);
+  messageContainer.appendChild(messageElement);
 })

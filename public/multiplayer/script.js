@@ -21,8 +21,8 @@ let inputDelay
 let lastBgChange = 0;
 let bgDelay = 700
 
-let eat = new Audio("sounds/eat.mp3")
-let death = new Audio("sounds/death.mp3")
+let eat = new Audio("../assets/sounds/eat.mp3")
+let death = new Audio("../assets/sounds/death.mp3")
 
 let userName;
 
@@ -185,8 +185,6 @@ socket.on("player-died", () => {
     html: 'You will respawn in <timer></timer> seconds.',
     timer: 3500,
     timerProgressBar: true,
-    allowEscapeKey: false,
-    allowOutsideClick: false,
     width: "25vw",
     didOpen: () => {
       Swal.showLoading()
