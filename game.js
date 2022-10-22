@@ -14,11 +14,10 @@ function createGameState() {
     players: {},
     foodPos: [
       { x: 10, y: 10 },
-      { x: 30, y: 30},
-      { x: 50, y: 50},
-      { x: 70, y: 70},
-      { x: 0, y: 0 },
-      { x: 79, y: 79},
+      { x: 20, y: 20 },
+      { x: 30, y: 30 },
+      { x: 40, y: 40 },
+      { x: 50, y: 50 },
     ],
     gridSize: GRIDSIZE,
     fps: FPS,
@@ -149,7 +148,7 @@ function gameLoop(game) {
       // Check if player is on food
       foodPos.forEach((food, foodIndex) => {
         if (headPos.x == food.x && headPos.y == food.y) {
-          player.newSegments += 10;
+          player.newSegments += 7;
           game = generateFood(game, food);
         }
       });

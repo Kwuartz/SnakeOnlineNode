@@ -171,7 +171,7 @@ socket.on("new-gamestate", (gamestate) => {
       socket.emit("player-death", userName)
       socket.emit("server-message", userName + " has died!");
     }
-    if (game.players[userName].newSegments == 3) {
+    if (game.players[userName].newSegments == 7) {
       eat.play()
     }
 
