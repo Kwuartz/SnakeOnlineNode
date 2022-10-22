@@ -61,7 +61,9 @@ io.on("connection", (socket) => {
     userName = players[socket.id];
     console.log(userName + " has respawned!");
     socket.emit("player-respawned");
-    game.players[userName] = createNewPlayer();
+    if (game.players) {
+      game.players[userName] = createNewPlayer();
+    }
   })
 
   socket.on("change-direction", (direction) => {

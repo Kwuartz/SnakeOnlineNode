@@ -71,11 +71,14 @@ function drawGame(game) {
 
   for (username in game.players) {
     let snake = game.players[username]
+    context.textAlign = "center"
     drawSnake(game.players[username], size);
     context.fillStyle = "white";
     context.fillText(username, (snake.headPos.x + 0.5) * size, snake.headPos.y * size);
-    context.textAlign = "left"
-    context.fillText("Score: " + (snake.segments.length - 3), size, size)
+    if (username == userName) {
+      context.textAlign = "left"
+      context.fillText("Score: " + (snake.segments.length - 3), size, size)
+    }
   }
 }
 

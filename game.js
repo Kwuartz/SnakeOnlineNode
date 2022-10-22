@@ -14,6 +14,8 @@ function createGameState() {
     foodPos: [
       { x: 10, y: 10 },
       { x: 30, y: 30 },
+      { x: 40, y: 40 },
+      { x: 0, y: 0 },
     ],
     gridSize: GRIDSIZE,
   };
@@ -122,14 +124,19 @@ function gameLoop(game) {
         }
       }
 
-      // Check if player hit edge
-      if (
-        headPos.x > GRIDSIZE ||
-        headPos.y > GRIDSIZE ||
-        headPos.x < 0 ||
-        headPos.y < 0
-      ) {
-        player.dead = true;
+      // Checks if player hits into wall and sends them to other side
+      if (headPos.x >= GRIDSIZE) {
+        headPos.x = -1
+      }
+      else if (headPos.x < 0) {
+        headPos.x = GRIDSIZE
+      }
+
+      if (headPos.y >= GRIDSIZE) {
+        headPos.y = -1
+      }
+      else if (headPos.y < 0) {
+        headPos.y = GRIDSIZE
       }
 
       // Check if player is on food
