@@ -116,8 +116,14 @@ window.addEventListener("keydown", (event) => {
 });
 
 socket.on("player-connected", (playerName) => {
-  console.log("Player spawned!");
+  console.log(playerName + " has connected!");
+  socket.emit("server-message", playerName + " has connected!");
   userName = playerName;
+  init();
+});
+
+socket.on("player-respawned", () => {
+  socket.emit("server-message", userName + " has respawned!");
   init();
 });
 
@@ -138,6 +144,7 @@ socket.on("new-gamestate", (gamestate) => {
     } else {
       death.play()
       socket.emit("player-death", userName)
+      socket.emit("server-message", userName + " has died!");
     }
     if (game.players[userName].newSegments == 3) {
       eat.play()
@@ -165,6 +172,6 @@ socket.on("player-died", () => {
       clearInterval(timerInterval)
     }
   }).then((result) => {
-    socket.emit("new-player", userName)
+    socket.emit("player-respawn", userName)
   })
 }) 

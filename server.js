@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const http = require("http").Server(app);
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 const { instrument } = require("@socket.io/admin-ui");
 const io = require("socket.io")(http, {
   cors: {
@@ -57,6 +57,13 @@ io.on("connection", (socket) => {
     game.players[userName] = createNewPlayer();
   });
 
+  socket.on("player-respawn", (userName) => {
+    userName = players[socket.id];
+    console.log(userName + " has respawned!");
+    socket.emit("player-respawned");
+    game.players[userName] = createNewPlayer();
+  })
+
   socket.on("change-direction", (direction) => {
     const userName = players[socket.id];
     if (game.players) {
@@ -82,7 +89,12 @@ io.on("connection", (socket) => {
   })
 
   socket.on("chat-message", (message) => {
-    socket.emit("message-recieved", message);
+    username = players[socket.id]
+    io.emit("message-recieved", message, username);
+  })
+
+  socket.on("server-message", (message) => {
+    io.emit("message-recieved", message);
   })
 });
 

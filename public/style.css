@@ -5,21 +5,30 @@ body {
     overflow: hidden;
 }
 
+#wrapper {
+  display: grid;
+  grid-template-columns: 1fr 4fr 1fr;
+}
+
 #chat-container {
   overflow-y: scroll;
 }
 
 #chat-message {
-  color: blue;
+  font-family: Geneva, Verdana, sans-serif;
+  color: white;
 }
+
 
 #game {
   height: 100vmin;
   width: 100vmin;
-  margin: auto;
+  padding: 1vmin;
 }
 
+
 #canvas {
-  height: 100vmin;
-  width: 100vmin;
+  height: 98vmin;
+  width: 98vmin;
+  margin: auto;
 }

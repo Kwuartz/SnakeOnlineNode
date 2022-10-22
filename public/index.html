@@ -11,9 +11,18 @@
   <title>Snake Game</title>
 </head>
 <body>
-  <div id="game">
-    <canvas id="canvas" ></canvas>
+  <div id="wrapper">
+    <div id="chat-container">
+      <form id="chat-form">
+        <input type="text" id="chat-input">
+        <button type="submit" id="chat-send">Send</button>
+      </form>
+    </div>
+    <div id="game">
+      <canvas id="canvas" ></canvas>
+    </div>
   </div>
   <script src="script.js" type="text/javascript"></script>
+  <script src="chat.js" type="text/javascript"></script>
 </body>
 </html>
