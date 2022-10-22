@@ -59,106 +59,110 @@ function gameLoop(game) {
   foodPos = game.foodPos;
   // Moves the players snakes and adds new segments
   for (playerName in players) {
-    player = players[playerName];
-    if (player.dead == false) {
-      segments = player.segments;
-      headPos = player.headPos;
-      movementDirection = player.movementDirection;
+    try {
+      player = players[playerName];
+      if (player.dead == false) {
+        segments = player.segments;
+        headPos = player.headPos;
+        movementDirection = player.movementDirection;
 
-      // If the player is waiting to have new segments added make a copy of the last segment before it moves and then add it afterwards
-      if (player.newSegments) {
-        newSegment = { ...segments[0] };
-      }
+        // If the player is waiting to have new segments added make a copy of the last segment before it moves and then add it afterwards
+        if (player.newSegments) {
+          newSegment = { ...segments[0] };
+        }
 
-      // Moves players
-      for (segmentIndex in segments) {
-        segment = segments[parseInt(segmentIndex)];
-        if (segmentIndex == segments.length - 1) {
-          headPos.x += movementDirection.x;
-          headPos.y += movementDirection.y;
-          segment.x = headPos.x;
-          segment.y = headPos.y;
-        } else {
-          nextSegment = segments[parseInt(segmentIndex) + 1];
-          segment.x = nextSegment.x;
-          segment.y = nextSegment.y;
+        // Moves players
+        for (segmentIndex in segments) {
+          segment = segments[parseInt(segmentIndex)];
+          if (segmentIndex == segments.length - 1) {
+            headPos.x += movementDirection.x;
+            headPos.y += movementDirection.y;
+            segment.x = headPos.x;
+            segment.y = headPos.y;
+          } else {
+            nextSegment = segments[parseInt(segmentIndex) + 1];
+            segment.x = nextSegment.x;
+            segment.y = nextSegment.y;
+          }
         }
       }
-    }
-    if (player.newSegments) {
-      addSegment(player, newSegment);
-    }
+      if (player.newSegments) {
+        addSegment(player, newSegment);
+      }
+    } catch (err) {throw err;}
   }
 
   for (playerName in players) {
-    player = players[playerName];
-    if (player.dead == false) {
-      // Checks if players hits into themselves
-      segments = player.segments;
-      headPos = player.headPos;
-      segments.forEach((segment, segmentIndex) => {
-        isHead = segmentIndex == segments.length - 1;
-        if (
-          isHead == false &&
-          segment.x == headPos.x &&
-          segment.y == headPos.y
-        ) {
-          player.dead = true;
-        }
-      });
+    try {
+      player = players[playerName];
+      if (player.dead == false) {
+        // Checks if players hits into themselves
+        segments = player.segments;
+        headPos = player.headPos;
+        segments.forEach((segment, segmentIndex) => {
+          isHead = segmentIndex == segments.length - 1;
+          if (
+            isHead == false &&
+            segment.x == headPos.x &&
+            segment.y == headPos.y
+          ) {
+            player.dead = true;
+          }
+        });
 
-      // Check if player hit into another snake
-      oponents = Object.keys(players);
-      for (oponentIndex in oponents) {
-        oponentName = oponents[oponentIndex];
-        isPlayer = oponentName == playerName;
+        // Check if player hit into another snake
+        oponents = Object.keys(players);
+        for (oponentIndex in oponents) {
+          oponentName = oponents[oponentIndex];
+          isPlayer = oponentName == playerName;
 
-        oponentSegments = game.players[oponentName].segments;
-        if (isPlayer == false) {
-          oponentSegments.forEach((oponentSegment, oponentSegmentIndex) => {
-            if (oponentSegment) {
-              oponentSegment = oponentSegments[oponentSegmentIndex];
-              if (
-                headPos &&
-                headPos.x == oponentSegment.x &&
-                headPos.y == oponentSegment.y
-              ) {
-                player.dead = true;
+          oponentSegments = game.players[oponentName].segments;
+          if (isPlayer == false) {
+            oponentSegments.forEach((oponentSegment, oponentSegmentIndex) => {
+              if (oponentSegment) {
+                oponentSegment = oponentSegments[oponentSegmentIndex];
+                if (
+                  headPos &&
+                  headPos.x == oponentSegment.x &&
+                  headPos.y == oponentSegment.y
+                ) {
+                  player.dead = true;
+                }
               }
-            }
-          });
+            });
+          }
+        }
+
+        // Checks if player hits into wall and sends them to other side
+        if (headPos.x >= GRIDSIZE) {
+          headPos.x = -1
+        }
+        else if (headPos.x < 0) {
+          headPos.x = GRIDSIZE
+        }
+
+        if (headPos.y >= GRIDSIZE) {
+          headPos.y = -1
+        }
+        else if (headPos.y < 0) {
+          headPos.y = GRIDSIZE
+        }
+
+        // Check if player is on food
+        foodPos.forEach((food, foodIndex) => {
+          if (headPos.x == food.x && headPos.y == food.y) {
+            player.newSegments += 7;
+            game = generateFood(game, food);
+          }
+        });
+
+        // Kills player
+        if (player.dead == true) {
+          player.segments = [];
+          console.log(playerName + " has died");
         }
       }
-
-      // Checks if player hits into wall and sends them to other side
-      if (headPos.x >= GRIDSIZE) {
-        headPos.x = -1
-      }
-      else if (headPos.x < 0) {
-        headPos.x = GRIDSIZE
-      }
-
-      if (headPos.y >= GRIDSIZE) {
-        headPos.y = -1
-      }
-      else if (headPos.y < 0) {
-        headPos.y = GRIDSIZE
-      }
-
-      // Check if player is on food
-      foodPos.forEach((food, foodIndex) => {
-        if (headPos.x == food.x && headPos.y == food.y) {
-          player.newSegments += 7;
-          game = generateFood(game, food);
-        }
-      });
-
-      // Kills player
-      if (player.dead == true) {
-        player.segments = [];
-        console.log(playerName + " has died");
-      }
-    }
+    } catch (err) {throw err;}
   }
   return game;
 }
