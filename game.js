@@ -20,8 +20,7 @@ function createGameState() {
     ],
     gridSize: GRIDSIZE,
     fps: FPS,
-    party: false,
-    bg: "#008ab8"
+    party: false
   };
 }
 
@@ -157,10 +156,6 @@ function gameLoop(game) {
         console.log(playerName + " has died");
       }
     }
-  }
-
-  if (game.party) {
-    game.bg = randomColour()
   }
   return game;
 }

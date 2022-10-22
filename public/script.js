@@ -1,11 +1,25 @@
 const socket = io();
 const gameBoard = document.getElementById("game");
-const foodColour = "#FF0000";
+const foodColour = "red";
+let bg = "#008ab8"
+const partyColors = [
+  "#f02f22", // Tomato
+  "#F8931F", // Orange
+  "#24e327", // Green
+  "#0563fa", // Light blue
+  "#4a1bf5", // Purple
+  "#f54278", // Peach
+  "#9B26B6", // Violet
+  "#fab505", // Gold
+];
 
 let context, canvas, game;
 
 let lastDirectionChange = 0;
-let delay
+let inputDelay
+
+let lastBgChange = 0;
+let bgDelay = 700
 
 let eat = new Audio("sounds/eat.mp3")
 let death = new Audio("sounds/death.mp3")
@@ -43,7 +57,7 @@ function sleep(milliseconds){
 }
 
 function resetBoard() {
-  context.fillStyle = game.bg;
+  context.fillStyle = bg;
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.textAlign = "center";
 }
@@ -77,6 +91,16 @@ function drawGame(game) {
       context.fillText("Score: " + (snake.segments.length - 3), size, size)
     }
   }
+
+  if (game.party) {
+    if (lastBgChange < Date.now() - bgDelay) {
+      lastBgChange = Date.now();
+      bg = partyColors[Math.round(Math.random() * partyColors.length - 1) + 1]
+    }
+  }
+  else {
+    bg = "#008ab8"
+  }
 }
 
 function drawSnake(snake, size) {
@@ -108,7 +132,7 @@ function playSound(sound) {
 window.addEventListener("keydown", (event) => {
   if (game) {
     movementDirection = getKeys(event.key);
-    if (lastDirectionChange < Date.now() - delay) {
+    if (lastDirectionChange < Date.now() - inputDelay) {
       lastDirectionChange = Date.now();
       if (movementDirection) {
         socket.emit("change-direction", movementDirection);
@@ -151,7 +175,7 @@ socket.on("new-gamestate", (gamestate) => {
       eat.play()
     }
 
-    delay = 900 / game.fps
+    inputDelay = 900 / game.fps
   }
 });
 

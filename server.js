@@ -96,7 +96,6 @@ io.on("connection", (socket) => {
       game.party = true
     } else if (message == "stop party") {
       game.party = false
-      game.bg = "#008ab8"
     }
     io.emit("message-recieved", message, username);
   })
@@ -110,6 +109,10 @@ function noop() {}
 
 function startGameInterval() {
   startGameInterval = noop;
+  defaultInterval()
+}
+
+function defaultInterval() {
   const interval = setInterval(() => {
     game = gameLoop(game);
     io.emit("new-gamestate", game);
@@ -128,17 +131,5 @@ function partyInterval() {
       clearInterval(interval)
       defaultInterval()
     }
-  }, 1000 / (game.fps * 4));
-}
-
-function defaultInterval() {
-  const interval = setInterval(() => {
-    game = gameLoop(game);
-    io.emit("new-gamestate", game);
-    if (game.party == true) {
-      game.fps = FPS * 4
-    } else {
-      game.fps = FPS
-    }
-  }, 1000 / game.fps);
+  }, 1000 / (game.fps * 2));
 }
