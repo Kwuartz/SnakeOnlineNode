@@ -14,9 +14,11 @@ function createGameState() {
     players: {},
     foodPos: [
       { x: 10, y: 10 },
-      { x: 30, y: 30 },
-      { x: 40, y: 40 },
+      { x: 30, y: 30},
+      { x: 50, y: 50},
+      { x: 70, y: 70},
       { x: 0, y: 0 },
+      { x: 79, y: 79},
     ],
     gridSize: GRIDSIZE,
     fps: FPS,
@@ -115,13 +117,15 @@ function gameLoop(game) {
         oponentSegments = game.players[oponentName].segments;
         if (isPlayer == false) {
           oponentSegments.forEach((oponentSegment, oponentSegmentIndex) => {
-            oponentSegment = oponentSegments[oponentSegmentIndex];
-            if (
-              headPos &&
-              headPos.x == oponentSegment.x &&
-              headPos.y == oponentSegment.y
-            ) {
-              player.dead = true;
+            if (oponentSegment) {
+              oponentSegment = oponentSegments[oponentSegmentIndex];
+              if (
+                headPos &&
+                headPos.x == oponentSegment.x &&
+                headPos.y == oponentSegment.y
+              ) {
+                player.dead = true;
+              }
             }
           });
         }
@@ -145,7 +149,7 @@ function gameLoop(game) {
       // Check if player is on food
       foodPos.forEach((food, foodIndex) => {
         if (headPos.x == food.x && headPos.y == food.y) {
-          player.newSegments += 100;
+          player.newSegments += 10;
           game = generateFood(game, food);
         }
       });
