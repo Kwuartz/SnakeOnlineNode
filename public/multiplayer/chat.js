@@ -21,4 +21,5 @@ socket.on("message-recieved", (message, username) => {
     messageElement.innerText = message;
   }
   messageContainer.appendChild(messageElement);
+  messageContainer.scrollTop = messageContainer.scrollHeight;
 })
