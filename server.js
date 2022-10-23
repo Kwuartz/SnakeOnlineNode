@@ -6,14 +6,17 @@ const { instrument } = require("@socket.io/admin-ui");
 const io = require("socket.io")(http, {
   cors: {
     origin: [
-      "http://localhost:5500",
       "http://localhost:3000",  
       "http://127.0.0.1:5500",
       "https://admin.socket.io",
-      "https://snake-online-dan.herokuapp.com"
+      "https://snake-online-dan.herokuapp.com",
+      "https://snakeonlinevercel.vercel.app"
     ],
-    credentials: true,
+    methods: ["GET", "POST"],
+    transports: ['websocket', 'polling'],
+    credentials: true
   },
+  allowEIO3: true
 });
 
 instrument(io, {
