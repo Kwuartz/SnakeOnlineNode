@@ -190,7 +190,7 @@ socket.on("new-gamestate", (gamestate) => {
       eat.play()
     }
 
-    inputDelay = 500 / game.fps
+    inputDelay = 800 / game.fps
   }
 });
 
