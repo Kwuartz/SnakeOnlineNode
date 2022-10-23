@@ -72,6 +72,8 @@ function getKeys(key) {
       return (movementDirection = { x: 1, y: 0 });
     case "arrowleft":
       return (movementDirection = { x: -1, y: 0 });
+    case (" "):
+      return "speed"
     default:
       return false;
   }
@@ -83,7 +85,11 @@ window.addEventListener("keydown", (event) => {
     if (lastDirectionChange < Date.now() - inputDelay) {
       lastDirectionChange = Date.now();
       if (movementDirection) {
-        socket.emit("change-direction", movementDirection, "singleplayer");
+        if (movementDirection == "speed") {
+          socket.emit("speedIncrease", "singleplayer")
+        } else {
+          socket.emit("change-direction", movementDirection, "singleplayer");
+        }
       }
     }
   }
