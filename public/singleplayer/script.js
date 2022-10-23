@@ -34,6 +34,7 @@ function init() {
   canvas = document.getElementById("canvas");
   context = canvas.getContext("2d");
   canvas.width = canvas.height = 800;
+  context.font = "0.9rem Arial"
 }
 
 function drawGame(game) {
@@ -52,7 +53,7 @@ function drawGame(game) {
   drawSnake(game.players[userName], size);
   context.fillStyle = "white"
   context.textAlign = "left"
-  context.fillText("Score: " + (snake.segments.length - 3), size, size)
+  context.fillText("Score: " + (snake.segments.length - 3), 0.9 * size, 1.5 * size)
 }
 
 function drawSnake(snake, size) {

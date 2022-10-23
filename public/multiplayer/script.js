@@ -65,7 +65,8 @@ function resetBoard() {
 function init() {
   canvas = document.getElementById("canvas");
   context = canvas.getContext("2d");
-  canvas.width = canvas.height = 600;
+  canvas.width = canvas.height = 1000;
+  context.font = "1.2rem Arial"
 }
 
 function drawGame(game) {
@@ -88,7 +89,7 @@ function drawGame(game) {
     context.fillText(username, (snake.headPos.x + 0.5) * size, snake.headPos.y * size);
     if (username == userName) {
       context.textAlign = "left"
-      context.fillText("Score: " + (snake.segments.length - 3), size, size)
+      context.fillText("Score: " + (snake.segments.length - 3), 0.9 * size, 1.5 * size)
     }
   }
 
