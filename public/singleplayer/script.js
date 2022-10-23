@@ -2,16 +2,6 @@ const socket = io();
 const gameBoard = document.getElementById("game");
 const foodColour = "red";
 let bg = "#008ab8"
-const partyColors = [
-  "#f02f22", // Tomato
-  "#F8931F", // Orange
-  "#24e327", // Green
-  "#0563fa", // Light blue
-  "#4a1bf5", // Purple
-  "#f54278", // Peach
-  "#9B26B6", // Violet
-  "#fab505", // Gold
-];
 
 let context, canvas, game;
 
@@ -24,31 +14,9 @@ let bgDelay = 700
 let eat = new Audio("../assets/sounds/eat.mp3")
 let death = new Audio("../assets/sounds/death.mp3")
 
-let userName;
+let userName = "player";
 
-Swal.fire({
-  titleText: "Submit your username!",
-  inputPlaceholder: "Enter your username",
-  html: `<input type="text" id="username" class="swal2-input" placeholder="Enter your username!">`,
-  inputAttributes: {
-    autocapitalize: "off",
-    autocorrect: "off",
-    maxLength: 20,
-  },
-  confirmButtonText: 'Play',
-  showLoaderOnConfirm: true,
-  allowEscapeKey: false,
-  allowOutsideClick: false,
-  preConfirm: () => {
-    const username = Swal.getPopup().querySelector('#username').value
-    if (!username) {
-      Swal.showValidationMessage("Your username cannot be blank!")
-    }
-    return {username:username};
-  }
-}).then((result) => {
-  socket.emit("new-singleplayer", result.value.username);
-})
+socket.emit("new-singleplayer");
 
 function sleep(milliseconds){
   return new Promise(resolve => {
@@ -65,7 +33,7 @@ function resetBoard() {
 function init() {
   canvas = document.getElementById("canvas");
   context = canvas.getContext("2d");
-  canvas.width = canvas.height = 600;
+  canvas.width = canvas.height = 800;
 }
 
 function drawGame(game) {
@@ -80,27 +48,11 @@ function drawGame(game) {
     context.fillRect(food.x * size, food.y * size, size, size);
   }
 
-  for (username in game.players) {
-    let snake = game.players[username]
-    context.textAlign = "center"
-    drawSnake(game.players[username], size);
-    context.fillStyle = "white";
-    context.fillText(username, (snake.headPos.x + 0.5) * size, snake.headPos.y * size);
-    if (username == userName) {
-      context.textAlign = "left"
-      context.fillText("Score: " + (snake.segments.length - 3), size, size)
-    }
-  }
-
-  if (game.party) {
-    if (lastBgChange < Date.now() - bgDelay) {
-      lastBgChange = Date.now();
-      bg = partyColors[Math.round(Math.random() * partyColors.length - 1) + 1]
-    }
-  }
-  else {
-    bg = "#008ab8"
-  }
+  let snake = game.players[userName]
+  drawSnake(game.players[userName], size);
+  context.fillStyle = "white"
+  context.textAlign = "left"
+  context.fillText("Score: " + (snake.segments.length - 3), size, size)
 }
 
 function drawSnake(snake, size) {
@@ -125,25 +77,20 @@ function getKeys(key) {
   }
 }
 
-function playSound(sound) {
-
-}
-
 window.addEventListener("keydown", (event) => {
   if (game) {
     movementDirection = getKeys(event.key);
     if (lastDirectionChange < Date.now() - inputDelay) {
       lastDirectionChange = Date.now();
       if (movementDirection) {
-        socket.emit("change-direction", movementDirection, "singleplayer", userName);
+        socket.emit("change-direction", movementDirection, "singleplayer");
       }
     }
   }
 });
 
-socket.on("player-connected", (playerName) => {
-  console.log(playerName + " has connected!");
-  userName = playerName;
+socket.on("player-connected", () => {
+  console.log("Player has connected!");
   init();
 });
 
@@ -154,13 +101,13 @@ socket.on("new-gamestate", (gamestate) => {
       requestAnimationFrame(() => drawGame(game));
     } else {
       death.play()
-      socket.emit("player-death", "singleplayer", userName)
+      socket.emit("player-death", "singleplayer")
     }
     if (game.players[userName].newSegments == 7) {
       eat.play()
     }
 
-    inputDelay = 900 / game.fps
+    inputDelay = 500 / game.fps
   }
 });
 
@@ -182,6 +129,6 @@ socket.on("player-died", () => {
       clearInterval(timerInterval)
     }
   }).then((result) => {
-    socket.emit("player-respawn", userName, "singleplayer", userName)
+    socket.emit("player-respawn", "singleplayer")
   })
 }) 

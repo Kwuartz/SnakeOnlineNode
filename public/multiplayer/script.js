@@ -120,13 +120,11 @@ function getKeys(key) {
       return (movementDirection = { x: 1, y: 0 });
     case "arrowleft":
       return (movementDirection = { x: -1, y: 0 });
+    case (" "):
+      return "speed"
     default:
       return false;
   }
-}
-
-function playSound(sound) {
-
 }
 
 window.addEventListener("keydown", (event) => {
@@ -135,7 +133,11 @@ window.addEventListener("keydown", (event) => {
     if (lastDirectionChange < Date.now() - inputDelay) {
       lastDirectionChange = Date.now();
       if (movementDirection) {
-        socket.emit("change-direction", movementDirection, "multiplayer");
+        if (movementDirection == "speed") {
+          socket.emit("speedIncrease", "multiplayer")
+        } else {
+          socket.emit("change-direction", movementDirection, "multiplayer");
+        }
       }
     }
   }
@@ -148,14 +150,31 @@ socket.on("player-connected", (playerName) => {
   init();
 });
 
-socket.on("username-taken"),
-  () => {
-    console.log("Player username taken!");
-    socket.emit(
-      "new-player",
-      prompt("User name is already taken!", "YourName")
-    );
-  };
+socket.on("username-taken", () => {
+  Swal.fire({
+    titleText: "This username is taken!",
+    inputPlaceholder: "Enter another username!",
+    html: `<input type="text" id="username" class="swal2-input" placeholder="Enter your username!">`,
+    inputAttributes: {
+      autocapitalize: "off",
+      autocorrect: "off",
+      maxLength: 20,
+    },
+    confirmButtonText: 'Play',
+    showLoaderOnConfirm: true,
+    allowEscapeKey: false,
+    allowOutsideClick: false,
+    preConfirm: () => {
+      const username = Swal.getPopup().querySelector('#username').value
+      if (!username) {
+        Swal.showValidationMessage("Your username cannot be blank!")
+      }
+      return {username:username};
+    }
+  }).then((result) => {
+    socket.emit("new-multiplayer", result.value.username);
+  })
+})
 
 socket.on("new-gamestate", (gamestate) => {
   game = gamestate;
@@ -171,7 +190,7 @@ socket.on("new-gamestate", (gamestate) => {
       eat.play()
     }
 
-    inputDelay = 900 / game.fps
+    inputDelay = 500 / game.fps
   }
 });
 
@@ -181,6 +200,8 @@ socket.on("player-died", () => {
     html: 'You will respawn in <timer></timer> seconds.',
     timer: 3500,
     timerProgressBar: true,
+    allowEscapeKey: false,
+    allowOutsideClick: false,
     width: "25vw",
     didOpen: () => {
       Swal.showLoading()

@@ -29,7 +29,7 @@ const { createNewPlayer } = require("./game");
 const { changeDirection } = require("./game");
 const { gameLoop } = require("./game");
 
-const players = [];
+const multiplayerPlayers = {};
 let multiplayerGame;
 let multiplayerRoom = "multiplayer"
 
@@ -56,75 +56,99 @@ http.listen(port, () => {
 io.on("connection", (socket) => {
   console.log("User connected with id: " + socket.id);
   socket.on("new-multiplayer", (userName) => {
-    if (multiplayerGame) {} else {
-      multiplayerGame = createGameState();
-      gameInterval(multiplayerRoom, multiplayerGame);
-      console.log("New game instance created!")
-    }
+    if (Object.values(multiplayerPlayers).includes(userName)) {
+      socket.emit("username-taken")
+      console.log("username-taken")
+    } else {
+      if (multiplayerGame) {} else {
+        multiplayerGame = createGameState();
+        gameInterval(multiplayerRoom, multiplayerGame);
+        console.log("New multiplayer game instance created!")
+      }
 
-    socket.join(multiplayerRoom)
-    players[socket.id] = userName;
-    console.log(userName + " has connected!");
-    socket.emit("player-connected", userName);
-    multiplayerGame.players[userName] = createNewPlayer();
+      socket.join(multiplayerRoom)
+      multiplayerPlayers[socket.id] = userName;
+      console.log(userName + " has connected!");
+      socket.emit("player-connected", userName);
+      multiplayerGame.players[userName] = createNewPlayer();
+    }
   });
 
-  socket.on("player-respawn", (userName, gameType, username) => {
+  socket.on("new-singleplayer", () => {
+    console.log("New single player game instance created!")
+    singlePlayerGames[socket.id] = createGameState()
+    singlePlayerGames[socket.id].players["player"] = createNewPlayer()
+    gameInterval(socket.id, singlePlayerGames[socket.id])
+    socket.emit("player-connected")
+  })
+
+  socket.on("player-respawn", (userName, gameType) => {
     if (gameType == "multiplayer") {
-      userName = players[socket.id];
+      userName = multiplayerPlayers[socket.id];
       console.log(userName + " has respawned!");
-      if (multiplayerGame.players) {
+      if (multiplayerGame) {
         multiplayerGame.players[userName] = createNewPlayer();
       }
-    } else {
-      singlePlayerGames[username].players[username] = createNewPlayer();
+    } else if (gameType == "singleplayer") {
+      singlePlayerGames[socket.id].players["player"] = createNewPlayer();
     }
   })
 
-  socket.on("change-direction", (direction, gameType, username) => {
+  socket.on("change-direction", (direction, gameType) => {
     if (gameType == "multiplayer") {
-      const userName = players[socket.id];
+      const userName = multiplayerPlayers[socket.id];
       if (multiplayerGame.players) {
         let player = multiplayerGame.players[userName]; 
         player = changeDirection(direction, multiplayerGame, player);
       }
-    } else {
-      let player = singlePlayerGames[username].players[username]
-      player = changeDirection(direction, singlePlayerGames[username], player);
+    } else if (gameType == "singleplayer") {
+      let player = singlePlayerGames[socket.id].players["player"]
+      player = changeDirection(direction, singlePlayerGames[socket.id], player);
     }
   });
 
   socket.on("disconnect", () => {
     console.log("Player " + socket.id + " disconnected")
     if (multiplayerGame) {
-      const userName = players[socket.id]
+      const userName = multiplayerPlayers[socket.id]
       if (userName) {
         delete multiplayerGame.players[userName];
-        delete players[socket.id];
+        delete multiplayerPlayers[socket.id];
         if (Object.keys(multiplayerGame.players).length == 0) {
           delete multiplayerGame
-          console.log("Game instance terminated!")
+          console.log("Multiplayer game instance terminated!")
         }
       }
+    } else if (singlePlayerGames[socket.id]) {
+      delete singlePlayerGames[socket.id]
+      console.log("Single player game instance terminated!")
     }
   });
 
   // Kills player when they have died
-  socket.on("player-death", (gameType, username) => {
+  socket.on("player-death", (gameType) => {
     if (gameType == "multiplayer") {
-      userName = players[socket.id]
+      userName = multiplayerPlayers[socket.id]
       if (userName && multiplayerGame.players[userName]) {
         delete multiplayerGame.players[userName];
         socket.emit("player-died")
       }
-    } else {
-      delete singlePlayerGames[username].players[username]
+    } else if (gameType == "singleplayer") {
+      delete singlePlayerGames[socket.id].players["player"]
       socket.emit("player-died")
     }
   })
 
+  // Speeds up player when they press space
+  socket.on("speedIncrease", (gameType) => {
+    if (gameType == "multiplayer") {
+      userName = multiplayerPlayers[socket.id]
+      multiplayerGame.players[userName].speedIncrease += 10
+    }
+  })
+
   socket.on("chat-message", (message) => {
-    username = players[socket.id]
+    username = multiplayerPlayers[socket.id]
     if (message == "party") {
       if (multiplayerGame.party) {
         multiplayerGame.party = false
@@ -140,14 +164,6 @@ io.on("connection", (socket) => {
 
   socket.on("server-message", (message) => {
     io.emit("message-recieved", message);
-  })
-
-  socket.on("new-singleplayer", (userName) => {
-    console.log("New single player game!")
-    singlePlayerGames[userName] = createGameState()
-    singlePlayerGames[userName].players[userName] = createNewPlayer()
-    gameInterval(socket.id, singlePlayerGames[userName])
-    socket.emit("player-connected", userName)
   })
 });
 

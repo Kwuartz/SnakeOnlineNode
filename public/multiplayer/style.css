@@ -1,13 +1,13 @@
 body {
   width: 100vw;
   height: 100vh;
-  background-color: rgb(1, 1, 1);
+  background-color: rgb(0, 3, 3);
   overflow: hidden;
 }
 
 #wrapper {
   display: grid;
-  grid-template-columns: 1fr 4fr 1fr;
+  grid-template-columns: 19fr 40fr 20fr;
   max-height: 100vh;
 }
 
@@ -45,4 +45,11 @@ body {
   height: 98vmin;
   width: 98vmin;
   margin: auto;
+}
+
+#controls {
+  width: 100%;
+  color: white;
+  margin: auto;
+  text-align: center;
 }
