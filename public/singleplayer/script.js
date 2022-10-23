@@ -47,7 +47,7 @@ Swal.fire({
     return {username:username};
   }
 }).then((result) => {
-  socket.emit("new-multiplayer", result.value.username);
+  socket.emit("new-singleplayer", result.value.username);
 })
 
 function sleep(milliseconds){
@@ -135,7 +135,7 @@ window.addEventListener("keydown", (event) => {
     if (lastDirectionChange < Date.now() - inputDelay) {
       lastDirectionChange = Date.now();
       if (movementDirection) {
-        socket.emit("change-direction", movementDirection, "multiplayer");
+        socket.emit("change-direction", movementDirection, "singleplayer", userName);
       }
     }
   }
@@ -143,19 +143,9 @@ window.addEventListener("keydown", (event) => {
 
 socket.on("player-connected", (playerName) => {
   console.log(playerName + " has connected!");
-  socket.emit("server-message", playerName + " has connected!");
   userName = playerName;
   init();
 });
-
-socket.on("username-taken"),
-  () => {
-    console.log("Player username taken!");
-    socket.emit(
-      "new-player",
-      prompt("User name is already taken!", "YourName")
-    );
-  };
 
 socket.on("new-gamestate", (gamestate) => {
   game = gamestate;
@@ -164,8 +154,7 @@ socket.on("new-gamestate", (gamestate) => {
       requestAnimationFrame(() => drawGame(game));
     } else {
       death.play()
-      socket.emit("player-death", "multiplayer")
-      socket.emit("server-message", userName + " has died!");
+      socket.emit("player-death", "singleplayer", userName)
     }
     if (game.players[userName].newSegments == 7) {
       eat.play()
@@ -193,6 +182,6 @@ socket.on("player-died", () => {
       clearInterval(timerInterval)
     }
   }).then((result) => {
-    socket.emit("player-respawn", userName, "multiplayer")
+    socket.emit("player-respawn", userName, "singleplayer", userName)
   })
 }) 
