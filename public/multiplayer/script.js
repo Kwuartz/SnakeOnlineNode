@@ -115,11 +115,19 @@ function getKeys(key) {
   switch (key.toLowerCase()) {
     case "arrowup":
       return (movementDirection = { x: 0, y: -1 });
+    case "w":
+      return (movementDirection = { x: 0, y: -1 });
     case "arrowdown":
       return (movementDirection = { x: 0, y: 1 });
+      case "s":
+        return (movementDirection = { x: 0, y: 1 });
     case "arrowright":
       return (movementDirection = { x: 1, y: 0 });
+    case "d":
+      return (movementDirection = { x: 1, y: 0 });
     case "arrowleft":
+      return (movementDirection = { x: -1, y: 0 });
+    case "a":
       return (movementDirection = { x: -1, y: 0 });
     case (" "):
       return "speed"
