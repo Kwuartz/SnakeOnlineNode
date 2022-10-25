@@ -181,7 +181,7 @@ function gameInterval(room, gamestate) {
     io.to(room).emit("new-gamestate", gamestate);
     if (gamestate.party == true) {
       clearInterval(interval)
-      partyInterval(room)
+      partyInterval(room, gamestate)
     }
   }, 1000 / FPS);
 }
@@ -192,7 +192,7 @@ function partyInterval(room, gamestate) {
     io.to(room).emit("new-gamestate", gamestate);
     if (gamestate.party == false) {
       clearInterval(interval)
-      gameInterval(room)
+      gameInterval(room, gamestate)
     }
   }, 1000 / (FPS * 2));
 }
