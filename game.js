@@ -55,6 +55,8 @@ function gameLoop(game) {
   for (playerName in players) {
     let player = players[playerName];
     let newSegment
+
+    if (!player) {continue}
     if (player.dead == false) {
       let segments = player.segments;
       let headPos = player.headPos;
@@ -87,6 +89,7 @@ function gameLoop(game) {
 
   for (playerName in players) {
     let player = players[playerName];
+    if (!player) {continue}
 
     if (player.dead == false) {
       // Checks if players hits into themselves
@@ -163,6 +166,7 @@ function gameLoop(game) {
     let headPos = player.headPos;
     let movementDirection = player.movementDirection;
     // If player has used speed increase move them twice, take away three of their segments and run checks twice
+    if (!player) {continue}
     if (player.dead == false && player.speedIncrease) {
       // Checks if they have enough segments to speed up
       if (player.segments.length > 3) {
@@ -255,7 +259,8 @@ function gameLoop(game) {
   return game;
 }
 
-function changeDirection(direction, game, player) {
+function changeDirection(direction, player) {
+  if (!player) {return}
   let currentDirection = player.movementDirection;
   if (
     currentDirection.x - 2 == direction.x ||

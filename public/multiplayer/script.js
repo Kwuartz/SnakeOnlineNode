@@ -43,6 +43,10 @@ Swal.fire({
     const username = Swal.getPopup().querySelector('#username').value
     if (!username) {
       Swal.showValidationMessage("Your username cannot be blank!")
+    } else if (username.length > 30) {
+      Swal.showValidationMessage("Your username is too long!")
+    } else if (!/^[A-Za-z0-9_ ]*$/.test(username)) {
+      Swal.showValidationMessage("You cannot inclue  special characters in your username!")
     }
     return {username:username};
   }
@@ -108,6 +112,9 @@ function drawSnake(snake, size) {
   snake.segments.forEach((segment, _) => {
     context.fillStyle = snake.snakeColour;
     context.fillRect(segment.x * size, segment.y * size, size, size);
+    if (segment.x == snake.headPos.x && segment.y == snake.headPos. y) {
+      context.fillRect((segment.x + 0.5) * size, (segment.y + 0.5) * size, 2, 2)
+    }
   });
 }
 

@@ -102,11 +102,11 @@ io.on("connection", (socket) => {
       const userName = multiplayerPlayers[socket.id];
       if (multiplayerGame.players) {
         let player = multiplayerGame.players[userName]; 
-        player = changeDirection(direction, multiplayerGame, player);
+        player = changeDirection(direction, player);
       }
     } else if (gameType == "singleplayer") {
       let player = singlePlayerGames[socket.id].players["player"]
-      player = changeDirection(direction, singlePlayerGames[socket.id], player);
+      player = changeDirection(direction, player);
     }
   });
 
@@ -180,7 +180,7 @@ function gameInterval(room, gamestate) {
       clearInterval(interval)
       partyInterval(room)
     }
-  }, 1000 / gamestate.fps);
+  }, 1000 / FPS);
 }
 
 function partyInterval(room, gamestate) {
@@ -191,5 +191,5 @@ function partyInterval(room, gamestate) {
       clearInterval(interval)
       gameInterval(room)
     }
-  }, 1000 / (gamestate.fps * 2));
+  }, 1000 / (FPS * 2));
 }
