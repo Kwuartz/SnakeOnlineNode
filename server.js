@@ -46,6 +46,7 @@ app.get("/", (req, res) => {
 
 app.get("/multiplayer", (req, res) => {
   res.sendFile(__dirname + '/public/multiplayer/index.html');
+  console.log(req.ip)
 });
 
 app.get("/singleplayer", (req, res) => {

@@ -13,7 +13,9 @@ body {
 
 #message-container {
   height: 96.5vh;
+  width: 33vh;
   max-height: 96.5vh;
+  max-width: 33vh;
   overflow-y: scroll;
   overflow-x: hidden;
   scroll-behavior: auto;  
