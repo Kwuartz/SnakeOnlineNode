@@ -41,12 +41,12 @@ app.use(express.static(__dirname + "/public/"));
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + '/public/main/index.html');
-  console.log(req.ip)
+  var ip = req.headers['x-real-ip'] || req.connection.remoteAddress;
+  console.log(ip)
 });
 
 app.get("/multiplayer", (req, res) => {
   res.sendFile(__dirname + '/public/multiplayer/index.html');
-  console.log(req.ip)
 });
 
 app.get("/singleplayer", (req, res) => {
@@ -147,7 +147,9 @@ io.on("connection", (socket) => {
   socket.on("speedIncrease", (gameType) => {
     if (gameType == "multiplayer") {
       userName = multiplayerPlayers[socket.id]
-      multiplayerGame.players[userName].speedIncrease += 10
+      if (multiplayerGame.players[userName]) {
+        multiplayerGame.players[userName].speedIncrease += 10
+      }
     } else {
       singlePlayerGames[socket.id].players["player"].speedIncrease += 10 
     }
