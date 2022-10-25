@@ -30,7 +30,6 @@ function updateLeaderboard() {
   scores.reverse()
 
   // Matches up players to their ordered scores and puts the scores in a new array
-  console.log(playerScores)
   for (score in scores) {
     for (player in playerScores) {
       if (playerScores[player] == scores[score]) {
@@ -39,7 +38,6 @@ function updateLeaderboard() {
       }
     }
   }
-  console.log(orderedScores)
 
   // Createsl eaderboard with the scores
   for (player in orderedScores) {

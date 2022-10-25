@@ -113,7 +113,12 @@ function drawSnake(snake, size) {
     context.fillStyle = snake.snakeColour;
     context.fillRect(segment.x * size, segment.y * size, size, size);
     if (segment.x == snake.headPos.x && segment.y == snake.headPos. y) {
-      context.fillRect((segment.x + 0.5) * size, (segment.y + 0.5) * size, 2, 2)
+      context.fillStyle = "white"
+      context.fillRect((segment.x + 0.05) * size, (segment.y + 0.5) * size, size/4, size/4)
+      context.fillRect((segment.x + 0.65) * size, (segment.y + 0.5) * size, size/4, size/4)
+      context.fillStyle = "black"
+      context.fillRect((segment.x + 0.2) * size, (segment.y + 0.5) * size, size/8, size/8)
+      context.fillRect((segment.x + 0.8) * size, (segment.y + 0.5) * size, size/8, size/8)
     }
   });
 }
