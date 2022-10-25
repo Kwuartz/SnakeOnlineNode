@@ -74,14 +74,14 @@ io.on("connection", (socket) => {
       multiplayerPlayers[socket.id] = userName;
       console.log(userName + " has connected!");
       socket.emit("player-connected", userName);
-      multiplayerGame.players[userName] = createNewPlayer();
+      multiplayerGame.players[userName] = createNewPlayer(multiplayerGame);
     }
   });
 
   socket.on("new-singleplayer", () => {
     console.log("New single player game instance created!")
     singlePlayerGames[socket.id] = createGameState()
-    singlePlayerGames[socket.id].players["player"] = createNewPlayer()
+    singlePlayerGames[socket.id].players["player"] = createNewPlayer(singlePlayerGames[socket.id])
     gameInterval(socket.id, singlePlayerGames[socket.id])
     socket.emit("player-connected")
   })
@@ -91,10 +91,10 @@ io.on("connection", (socket) => {
       userName = multiplayerPlayers[socket.id];
       console.log(userName + " has respawned!");
       if (multiplayerGame) {
-        multiplayerGame.players[userName] = createNewPlayer();
+        multiplayerGame.players[userName] = createNewPlayer(multiplayerGame);
       }
     } else if (gameType == "singleplayer") {
-      singlePlayerGames[socket.id].players["player"] = createNewPlayer();
+      singlePlayerGames[socket.id].players["player"] = createNewPlayer(singlePlayerGames[socket.id]);
     }
   })
 

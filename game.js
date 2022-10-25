@@ -12,39 +12,33 @@ module.exports = {
 function createGameState() {
   return {
     players: {},
-    foodPos: [
-      { x: 10, y: 10 },
-      { x: 20, y: 20 },
-      { x: 30, y: 30 },
-      { x: 40, y: 40 },
-      { x: 50, y: 50 },
-    ],
+    // Generates food positions
+    foodPos: [...Array(5)].map(() => {
+      return {
+        x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
+        y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
+      }
+    }),
     gridSize: GRIDSIZE,
     fps: FPS,
     party: false
   };
 }
 
-function createNewPlayer() {
-  return {
-    headPos: {
-      x: 4,
-      y: 10,
-    },
+function createNewPlayer(gamestate) {
+  let player = getSpawn({
+    headPos: {},
     movementDirection: {
       x: 1,
       y: 0,
     },
-    segments: [
-      { x: 2, y: 10 },
-      { x: 3, y: 10 },
-      { x: 4, y: 10 },
-    ],
+    segments: [],
     dead: false,
-    newSegments: 10,
+    newSegments: 2,
     snakeColour: randomColour(),
     speedIncrease: 0
-  };
+  }, gamestate.players)
+  return player
 }
 
 function gameLoop(game) {
@@ -145,7 +139,7 @@ function gameLoop(game) {
       }
 
       // Check if player is on food
-      foodPos.forEach((food, foodIndex) => {
+      foodPos.forEach((food) => {
         if (headPos.x == food.x && headPos.y == food.y) {
           player.newSegments += 7;
           game = generateFood(game, food);
@@ -299,4 +293,32 @@ function generateFood(game, food) {
 function randomColour() {
   let colour = COLOURS[Math.floor(Math.random() * COLOURS.length)];
   return colour;
+}
+
+function getSpawn(player, players) {
+  let spawn = {
+    x: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
+    y: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
+  }
+
+  let empty = false
+  while (!empty) {
+    empty = true
+    for (otherPlayer in players) {
+      if (empty == true) {
+        players[otherPlayer].segments.forEach((segment) => {
+          if (spawn.x == segment.x && spawn.y == segment.y) {
+            empty = false
+            spawn = {
+              x: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
+              y: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
+            }
+          }
+        })
+      } else break
+    }
+  }
+  player.headPos = spawn
+  player.segments.push(spawn)
+  return player
 }
