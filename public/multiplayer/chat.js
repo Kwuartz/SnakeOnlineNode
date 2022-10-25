@@ -13,13 +13,13 @@ chatForm.addEventListener('submit', (event) => {
 });
 
 socket.on("message-recieved", (message, username) => {
-  messageElement = document.createElement("div");
-  messageElement.setAttribute("id", "chat-message")
+  let messageElement = document.createElement("div");
   if (username) {
     messageElement.innerText = username + ": " + message;
   } else {
     messageElement.innerText = message;
   }
+
   messageContainer.appendChild(messageElement);
   messageContainer.scrollTop = messageContainer.scrollHeight;
 })

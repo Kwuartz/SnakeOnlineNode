@@ -1,6 +1,12 @@
 const socket = io();
+
 const gameBoard = document.getElementById("game");
+
 const foodColour = "red";
+const foodLeafColour = "green";
+const foodImage = new Image();
+foodImage.src = "../assets/images/apple.png"
+
 let bg = "#008ab8"
 const partyColors = [
   "#f02f22", // Tomato
@@ -79,10 +85,13 @@ function drawGame(game) {
   const size = canvas.width / game.gridSize;
   const foodPos = game.foodPos;
 
-  context.fillStyle = foodColour;
   for (foodIndex in foodPos) {
     food = game.foodPos[foodIndex];
+    context.fillStyle = foodColour;
     context.fillRect(food.x * size, food.y * size, size, size);
+    context.fillStyle = foodLeafColour;
+    context.fillRect((food.x + 0.4) * size, (food.y - 0.1) * size, size/5, size/3);
+    // context.drawImage(foodImage, food.x * size, food.y * size, size, size)
   }
 
   for (username in game.players) {

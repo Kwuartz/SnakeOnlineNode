@@ -157,6 +157,7 @@ io.on("connection", (socket) => {
 
   socket.on("chat-message", (message) => {
     username = multiplayerPlayers[socket.id]
+    
     if (message == "party") {
       if (multiplayerGame.party) {
         multiplayerGame.party = false
