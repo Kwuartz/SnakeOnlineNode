@@ -35,10 +35,13 @@ let multiplayerRoom = "multiplayer"
 
 const singlePlayerGames = []
 
+app.set('trust proxy', true)
+
 app.use(express.static(__dirname + "/public/"));
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + '/public/main/index.html');
+  console.log(req.ip)
 });
 
 app.get("/multiplayer", (req, res) => {
