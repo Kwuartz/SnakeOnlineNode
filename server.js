@@ -35,8 +35,6 @@ let multiplayerRoom = "multiplayer"
 
 const singlePlayerGames = []
 
-app.set('trust proxy', true)
-
 app.use(express.static(__dirname + "/public/"));
 
 app.get("/", (req, res) => {
