@@ -163,6 +163,10 @@ io.on("connection", (socket) => {
     }
   })
 
+  socket.on("ping", (cb) => {
+    console.log(cb)
+  });
+
   socket.on("chat-message", (message) => {
     username = multiplayerPlayers[socket.id]
     
