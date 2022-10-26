@@ -24,10 +24,7 @@ instrument(io, {
 });
 
 const { FPS } = require("./constants");
-const { createGameState } = require("./game");
-const { createNewPlayer } = require("./game");
-const { changeDirection } = require("./game");
-const { gameLoop } = require("./game");
+const { createGameState, createNewPlayer, changeDirection, gameLoop } = require("./game");
 
 const multiplayerPlayers = {};
 let multiplayerGame;
@@ -64,7 +61,7 @@ io.on("connection", (socket) => {
       socket.emit("username-taken")
       console.log("username-taken")
     } else {
-      if (multiplayerGame) {} else {
+      if (multiplayerGame) {console.log(multiplayerGame)} else {
         multiplayerGame = createGameState();
         gameInterval(multiplayerRoom, multiplayerGame);
         console.log("New multiplayer game instance created!")

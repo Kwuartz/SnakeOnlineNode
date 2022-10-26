@@ -249,7 +249,7 @@ socket.on("username-taken", () => {
 socket.on("new-gamestate", (gamestate) => {
   game = gamestate;
   if (canvas && game.players[userName]) {
-    if (game.players[userName].dead == false) {
+    if (game.players[userName].dead == false) { 
       requestAnimationFrame(() => drawGame(game));
     } else {
       death.play()
