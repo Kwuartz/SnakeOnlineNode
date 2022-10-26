@@ -59,9 +59,8 @@ io.on("connection", (socket) => {
   socket.on("new-multiplayer", (userName) => {
     if (Object.values(multiplayerPlayers).includes(userName)) {
       socket.emit("username-taken")
-      console.log("username-taken")
     } else {
-      if (multiplayerGame) {console.log(multiplayerGame)} else {
+      if (multiplayerGame) {} else {
         multiplayerGame = createGameState();
         gameInterval(multiplayerRoom, multiplayerGame);
         console.log("New multiplayer game instance created!")
@@ -118,8 +117,8 @@ io.on("connection", (socket) => {
           delete multiplayerGame.players[userName];
         }
         delete multiplayerPlayers[socket.id];
-        if (Object.keys(multiplayerGame.players).length == 0) {
-          delete multiplayerGame
+        if (Object.keys(multiplayerGame.players).length <= 0) {
+          multiplayerGame = undefined
           console.log("Multiplayer game instance terminated!")
         }
       }
@@ -180,7 +179,6 @@ io.on("connection", (socket) => {
 function gameInterval(room, gamestate) {
   // To make sure timeout only runs once
   let timeOut = 0
-
   // Game interval
   const interval = setInterval(() => {
     gamestate = gameLoop(gamestate);

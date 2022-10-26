@@ -262,6 +262,7 @@ socket.on("new-gamestate", (gamestate) => {
 
     inputDelay = 800 / game.fps
   }
+  console.log("gamestate")
 });
 
 socket.on("player-died", () => {
