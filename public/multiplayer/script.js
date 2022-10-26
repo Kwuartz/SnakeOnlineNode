@@ -114,7 +114,7 @@ function resetBoard(gridSize) {
 function init() {
   canvas = document.getElementById("canvas");
   context = canvas.getContext("2d");
-  canvas.width = canvas.height = 1000;
+  canvas.width = canvas.height = 900;
   context.font = "1.2rem Monospace"
 }
 
