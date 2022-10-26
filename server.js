@@ -194,7 +194,8 @@ function gameInterval(room, gamestate) {
   // Game interval
   const interval = setInterval(() => {
     gamestate = gameLoop(gamestate);
-    io.to(room).emit("new-gamestate", gamestate);
+    start = Date.now();
+    io.to(room).emit("new-gamestate", gamestate, function () {console.log(`Latency: ${Date.now()-start}ms`)});
     if (gamestate.party == true) {
       clearInterval(interval)
       partyInterval(room, gamestate)
@@ -217,7 +218,7 @@ function gameInterval(room, gamestate) {
 
 // Double speed when on party mode
 function partyInterval(room, gamestate) {
-  let timeOut = 0
+  let timeOut = false
   const interval = setInterval(() => {
     gamestate = gameLoop(gamestate);
     io.to(room).emit("new-gamestate", gamestate);
@@ -225,14 +226,14 @@ function partyInterval(room, gamestate) {
       clearInterval(interval)
       gameInterval(room, gamestate)
     }
-    if (timeOut == 0 && Object.keys(gamestate.players).length < 1) {
-      timeOut++
+    if (timeOut == false && Object.keys(gamestate.players).length < 1) {
+      timeOut = true
       setTimeout(() => {
         if (Object.keys(gamestate.players).length < 1) {
           console.log("Interval cleared!")
           clearInterval(interval)
         } else {
-          timeOut = 0
+          timeOut = false
         }
       }, 10000)
     }

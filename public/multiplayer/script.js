@@ -253,7 +253,8 @@ socket.on("username-taken", () => {
   })
 })
 
-socket.on("new-gamestate", (gamestate) => {
+socket.on("new-gamestate", (gamestate, ping) => {
+  ping()
   game = gamestate;
   if (canvas && game.players[userName]) {
     if (game.players[userName].dead == false) { 
