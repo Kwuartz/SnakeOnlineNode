@@ -300,29 +300,35 @@ function getColour(colours) {
 }
 
 function getSpawn(player, players) {
-  let spawn = {
+  let spawnPos = {
     x: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
     y: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
   }
 
+  // Checks if any other player in general area and makes sure that it only checks a certain number of times before giving up
   let empty = false
-  while (!empty) {
+  let checkCount = 0
+  while (!empty && checkCount < 20) {
+    checkCount++
     empty = true
     for (otherPlayer in players) {
-      if (empty == true) {
-        players[otherPlayer].segments.forEach((segment) => {
-          if (spawn.x == segment.x && spawn.y == segment.y) {
-            empty = false
-            spawn = {
-              x: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
-              y: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
+      if (!empty) {break}
+      players[otherPlayer].segments.forEach((segment) => {
+        for (xPos in [Array(6).keys()]) {
+          for (yPos in [Array(6).keys()]) {
+            if (spawnPos.x + xPos == segment.x && spawnPos.y + yPos == segment.y) {
+              empty = false
+              spawnPos = {
+                x: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
+                y: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
+              }
             }
           }
-        })
-      } else break
+        }
+      })
     }
   }
-  player.headPos = spawn
-  player.segments.push(spawn)
+  player.headPos = spawnPos
+  player.segments.push(spawnPos)
   return player
 }
