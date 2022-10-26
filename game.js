@@ -303,30 +303,40 @@ function getSpawn(player, players) {
   let spawnPos = {
     x: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
     y: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
-  }
+  };
 
   // Checks if any other player in general area and makes sure that it only checks a certain number of times before giving up
-  let empty = false
+  let empty = false;
   while (!empty) {
-    empty = true
+    empty = true;
     for (otherPlayer in players) {
-      if (!empty) {break}
+      if (!empty) {
+        break;
+      }
       players[otherPlayer].segments.forEach((segment) => {
-        for (xPos in [Array(5).keys()]) {
-          for (yPos in [Array(5).keys()]) {
-            if (spawnPos.x + xPos == segment.x && spawnPos.y + yPos == segment.y) {
-              empty = false
+        for (xPos in [...Array(6).keys()]) {
+          xPos = parseInt(xPos);
+          for (yPos in [...Array(6).keys()]) {
+            yPos = parseInt(yPos);
+            if (
+              (spawnPos.x + xPos == segment.x && spawnPos.y + yPos == segment.y) ||
+              (spawnPos.x - xPos == segment.x && spawnPos.y + yPos == segment.y) ||
+              (spawnPos.x - xPos == segment.x && spawnPos.y - yPos == segment.y) ||
+              (spawnPos.x + xPos == segment.x && spawnPos.y - yPos == segment.y)
+            ) {
+              console.log(spawnPos);
+              empty = false;
               spawnPos = {
                 x: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
                 y: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
-              }
+              };
             }
           }
         }
-      })
+      });
     }
   }
-  player.headPos = spawnPos
-  player.segments.push(spawnPos)
-  return player
+  player.headPos = spawnPos;
+  player.segments.push(spawnPos);
+  return player;
 }
