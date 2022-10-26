@@ -196,7 +196,7 @@ function gameInterval(room, gamestate) {
     gamestate = gameLoop(gamestate);
     refinedGamestate = {...gamestate}
     delete refinedGamestate.colours
-    io.to(room).emit("new-gamestate", gamestate);
+    io.to(room).emit("new-gamestate", refinedGamestate);
     if (gamestate.party == true) {
       clearInterval(interval)
       partyInterval(room, gamestate)

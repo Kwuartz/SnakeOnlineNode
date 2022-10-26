@@ -249,9 +249,6 @@ socket.on("username-taken", () => {
 let lastUpdate = 0
 
 socket.on("new-gamestate", (gamestate) => {
-  console.log(Date.now() - lastUpdate)
-  lastUpdate = Date.now()
-
   game = gamestate;
   if (canvas && game.players[userName]) {
     if (game.players[userName].dead == false) { 
