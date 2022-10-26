@@ -29,6 +29,7 @@ const { createGameState, createNewPlayer, changeDirection, gameLoop } = require(
 const multiplayerPlayers = {};
 let multiplayerGame;
 let multiplayerRoom = "multiplayer"
+let deleteMultiTimeOut = false
 
 const singlePlayerGames = []
 
@@ -117,9 +118,16 @@ io.on("connection", (socket) => {
           delete multiplayerGame.players[userName];
         }
         delete multiplayerPlayers[socket.id];
-        if (Object.keys(multiplayerGame.players).length <= 0) {
-          multiplayerGame = undefined
-          console.log("Multiplayer game instance terminated!")
+        if (deleteMultiTimeOut == false && Object.keys(multiplayerGame.players).length <= 0) {
+          deleteMultiTimeOut = true
+          setTimeout(() => {
+            if (Object.keys(multiplayerGame.players).length <= 0) {
+              multiplayerGame = undefined
+              console.log("Multiplayer game instance terminated!")
+            } else {
+              deleteMultiTimeOut = false
+            }
+          }, 10000)
         }
       }
     } else if (singlePlayerGames[socket.id]) {
@@ -178,7 +186,7 @@ io.on("connection", (socket) => {
 
 function gameInterval(room, gamestate) {
   // To make sure timeout only runs once
-  let timeOut = 0
+  let timeOut = false
   // Game interval
   const interval = setInterval(() => {
     gamestate = gameLoop(gamestate);
@@ -188,14 +196,14 @@ function gameInterval(room, gamestate) {
       partyInterval(room, gamestate)
     }
     // Check if game ended
-    if (timeOut == 0 && Object.keys(gamestate.players).length < 1) {
-      timeOut++
+    if (timeOut == false && Object.keys(gamestate.players).length < 1) {
+      timeOut = true
       setTimeout(() => {
         if (Object.keys(gamestate.players).length < 1) {
           console.log("Interval cleared!")
           clearInterval(interval)
         } else {
-          timeOut = 0
+          timeOut = false
         }
       }, 10000)
     }

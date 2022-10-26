@@ -307,15 +307,13 @@ function getSpawn(player, players) {
 
   // Checks if any other player in general area and makes sure that it only checks a certain number of times before giving up
   let empty = false
-  let checkCount = 0
-  while (!empty && checkCount < 20) {
-    checkCount++
+  while (!empty) {
     empty = true
     for (otherPlayer in players) {
       if (!empty) {break}
       players[otherPlayer].segments.forEach((segment) => {
-        for (xPos in [Array(6).keys()]) {
-          for (yPos in [Array(6).keys()]) {
+        for (xPos in [Array(5).keys()]) {
+          for (yPos in [Array(5).keys()]) {
             if (spawnPos.x + xPos == segment.x && spawnPos.y + yPos == segment.y) {
               empty = false
               spawnPos = {

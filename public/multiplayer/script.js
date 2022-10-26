@@ -90,8 +90,8 @@ function sleep(milliseconds){
 }
 
 function resetBoard(gridSize) {
-  const size = (canvas.width / gridSize) * 2;
-  const gridArray = [...Array(gridSize / 2).keys()]
+  const size = (canvas.width / gridSize);
+  const gridArray = [...Array(gridSize).keys()]
   let darkBg = darkenColor(bg, -5)
   for (row in gridArray) {
     for (collumn in gridArray) {
@@ -262,7 +262,6 @@ socket.on("new-gamestate", (gamestate) => {
 
     inputDelay = 800 / game.fps
   }
-  console.log("gamestate")
 });
 
 socket.on("player-died", () => {
