@@ -21,7 +21,8 @@ function createGameState() {
     }),
     gridSize: GRIDSIZE,
     fps: FPS,
-    party: false
+    party: false,
+    colours: COLOURS
   };
 }
 
@@ -35,7 +36,7 @@ function createNewPlayer(gamestate) {
     segments: [],
     dead: false,
     newSegments: 2,
-    snakeColour: randomColour(),
+    snakeColour: getColour(gamestate.colours),
     speedIncrease: 0
   }, gamestate.players)
   return player
@@ -161,7 +162,7 @@ function gameLoop(game) {
     let movementDirection = player.movementDirection;
     // If player has used speed increase move them twice, take away three of their segments and run checks twice
     if (!player) {continue}
-    if (player.dead == false && player.speedIncrease) {
+    if (!player.dead && player.speedIncrease) {
       // Checks if they have enough segments to speed up
       if (player.segments.length > 3) {
         // Deletes their last 3 segments
@@ -290,8 +291,9 @@ function generateFood(game, food) {
   return game;
 }
 
-function randomColour() {
-  let colour = COLOURS[Math.floor(Math.random() * COLOURS.length)];
+function getColour(colours) {
+  let colour = colours[Math.floor(Math.random() * colours.length)];
+  colours.splice(colours.indexOf(colour), 1)
   return colour;
 }
 

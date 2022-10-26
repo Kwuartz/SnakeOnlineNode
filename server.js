@@ -116,6 +116,7 @@ io.on("connection", (socket) => {
     if (multiplayerGame) {
       const userName = multiplayerPlayers[socket.id]
       if (userName) {
+        multiPlayerGame.colours.push(multiplayerGame.players[userName].snakeColour)
         delete multiplayerGame.players[userName];
         delete multiplayerPlayers[socket.id];
         if (Object.keys(multiplayerGame.players).length == 0) {
@@ -134,6 +135,7 @@ io.on("connection", (socket) => {
     if (gameType == "multiplayer") {
       userName = multiplayerPlayers[socket.id]
       if (userName && multiplayerGame.players[userName]) {
+        multiplayerGame.colours.push(multiplayerGame.players[userName].snakeColour)
         delete multiplayerGame.players[userName];
         socket.emit("player-died")
       }
@@ -184,6 +186,10 @@ function gameInterval(room, gamestate) {
       clearInterval(interval)
       partyInterval(room, gamestate)
     }
+    if (Object.keys(gamestate.players).length < 1) {
+      clearInterval(interval)
+      console.log("Interval cleared!")
+    }
   }, 1000 / FPS);
 }
 
@@ -194,6 +200,10 @@ function partyInterval(room, gamestate) {
     if (gamestate.party == false) {
       clearInterval(interval)
       gameInterval(room, gamestate)
+    }
+    if (Object.keys(gamestate.players).length < 1) {
+      clearInterval(interval)
+      console.log("Interval cleared!")
     }
   }, 1000 / (FPS * 2));
 }
