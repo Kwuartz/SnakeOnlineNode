@@ -168,11 +168,11 @@ io.on("connection", (socket) => {
       multiplayerGame.party = false
     }
 
-    io.emit("message-recieved", message, username);
+    io.emit("message-recieved", message, username, multiplayerGame.players[username].snakeColour);
   })
 
   socket.on("server-message", (message) => {
-    io.emit("message-recieved", message);
+    io.emit("message-recieved", "Server: " + message);
   })
 });
 

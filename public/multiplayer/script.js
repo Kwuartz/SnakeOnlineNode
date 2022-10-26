@@ -7,7 +7,8 @@ const foodLeafColour = "green";
 const foodImage = new Image();
 foodImage.src = "../assets/images/apple.png"
 
-let bg = "#008ab8"
+let bg = "#79cf44"
+
 const partyColors = [
   "#f02f22", // Tomato
   "#F8931F", // Orange
@@ -60,15 +61,53 @@ Swal.fire({
   socket.emit("new-multiplayer", result.value.username);
 })
 
+// Not mine
+function darkenColor(color, percent) {
+
+  var R = parseInt(color.substring(1,3),16);
+  var G = parseInt(color.substring(3,5),16);
+  var B = parseInt(color.substring(5,7),16);
+
+  R = parseInt(R * (100 + percent) / 100);
+  G = parseInt(G * (100 + percent) / 100);
+  B = parseInt(B * (100 + percent) / 100);
+
+  R = (R<255)?R:255;  
+  G = (G<255)?G:255;  
+  B = (B<255)?B:255;  
+
+  var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
+  var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
+  var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+
+  return "#"+RR+GG+BB;
+}
+
 function sleep(milliseconds){
   return new Promise(resolve => {
       setTimeout(resolve, milliseconds);
   });
 }
 
-function resetBoard() {
-  context.fillStyle = bg;
-  context.fillRect(0, 0, canvas.width, canvas.height);
+function resetBoard(gridSize) {
+  const size = (canvas.width / gridSize) * 2;
+  const gridArray = [...Array(gridSize / 2).keys()]
+  let darkBg = darkenColor(bg, -5)
+  for (row in gridArray) {
+    for (collumn in gridArray) {
+      if (collumn % 2 == 0 && row % 2 == 0) {
+        context.fillStyle = bg
+        context.fillRect(row * size, collumn * size, size, size);
+      } else {
+        context.fillStyle = darkBg
+        if (collumn % 2 == 1 && row % 2 == 1) {
+          context.fillStyle = bg
+        }
+        context.fillRect(row * size, collumn * size, size, size);
+      }
+    }
+  }
+  // context.fillRect(0, 0, canvas.width, canvas.height);
   context.textAlign = "center";
 }
 
@@ -76,11 +115,11 @@ function init() {
   canvas = document.getElementById("canvas");
   context = canvas.getContext("2d");
   canvas.width = canvas.height = 1000;
-  context.font = "1.2rem Arial"
+  context.font = "1.2rem Monospace"
 }
 
 function drawGame(game) {
-  resetBoard();
+  resetBoard(game.gridSize);
 
   const size = canvas.width / game.gridSize;
   const foodPos = game.foodPos;
@@ -109,11 +148,11 @@ function drawGame(game) {
   if (game.party) {
     if (lastBgChange < Date.now() - bgDelay) {
       lastBgChange = Date.now();
-      bg = partyColors[Math.round(Math.random() * partyColors.length - 1) + 1]
+      bg = partyColors[Math.round(Math.random() * partyColors.length - 1)]
     }
   }
   else {
-    bg = "#008ab8"
+    bg = "#79cf44"
   }
 }
 

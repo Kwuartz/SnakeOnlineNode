@@ -12,10 +12,11 @@ chatForm.addEventListener('submit', (event) => {
   }
 });
 
-socket.on("message-recieved", (message, username) => {
+socket.on("message-recieved", (message, username, color) => {
   let messageElement = document.createElement("div");
   if (username) {
     messageElement.innerText = username + ": " + message;
+    messageElement.style.backgroundColor = color
   } else {
     messageElement.innerText = message;
   }
