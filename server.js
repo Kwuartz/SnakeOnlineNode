@@ -116,7 +116,7 @@ io.on("connection", (socket) => {
     if (multiplayerGame) {
       const userName = multiplayerPlayers[socket.id]
       if (userName) {
-        multiPlayerGame.colours.push(multiplayerGame.players[userName].snakeColour)
+        multiplayerGame.colours.push(multiplayerGame.players[userName].snakeColour)
         delete multiplayerGame.players[userName];
         delete multiplayerPlayers[socket.id];
         if (Object.keys(multiplayerGame.players).length == 0) {
@@ -179,6 +179,10 @@ io.on("connection", (socket) => {
 });
 
 function gameInterval(room, gamestate) {
+  // To make sure timeout only runs once
+  let timeOut = 0
+
+  // Game interval
   const interval = setInterval(() => {
     gamestate = gameLoop(gamestate);
     io.to(room).emit("new-gamestate", gamestate);
@@ -186,14 +190,23 @@ function gameInterval(room, gamestate) {
       clearInterval(interval)
       partyInterval(room, gamestate)
     }
-    if (Object.keys(gamestate.players).length < 1) {
-      clearInterval(interval)
-      console.log("Interval cleared!")
+    // Check if game ended
+    if (timeOut == 0 && Object.keys(gamestate.players).length < 1) {
+      timeOut++
+      setTimeout(() => {
+        if (Object.keys(gamestate.players).length < 1) {
+          console.log("Interval cleared!")
+          clearInterval(interval)
+        } else {
+          timeOut = 0
+        }
+      }, 10000)
     }
   }, 1000 / FPS);
 }
 
 function partyInterval(room, gamestate) {
+  let timeOut = 0
   const interval = setInterval(() => {
     gamestate = gameLoop(gamestate);
     io.to(room).emit("new-gamestate", gamestate);
@@ -201,9 +214,16 @@ function partyInterval(room, gamestate) {
       clearInterval(interval)
       gameInterval(room, gamestate)
     }
-    if (Object.keys(gamestate.players).length < 1) {
-      clearInterval(interval)
-      console.log("Interval cleared!")
+    if (timeOut == 0 && Object.keys(gamestate.players).length < 1) {
+      timeOut++
+      setTimeout(() => {
+        if (Object.keys(gamestate.players).length < 1) {
+          console.log("Interval cleared!")
+          clearInterval(interval)
+        } else {
+          timeOut = 0
+        }
+      }, 10000)
     }
   }, 1000 / (FPS * 2));
 }

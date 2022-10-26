@@ -82,6 +82,7 @@ function gameLoop(game) {
     }
   }
 
+  // Checks
   for (playerName in players) {
     let player = players[playerName];
     if (!player) {continue}
@@ -155,6 +156,7 @@ function gameLoop(game) {
     }
   }
 
+  // Speed increase and checks
   for (playerName in players) {
     let player = players[playerName];
     let segments = player.segments;
