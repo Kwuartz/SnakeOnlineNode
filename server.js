@@ -194,9 +194,9 @@ function gameInterval(room, gamestate) {
   // Game interval
   const interval = setInterval(() => {
     gamestate = gameLoop(gamestate);
-    // Latency test
-    start = Date.now();
-    io.to(room).emit("new-gamestate", gamestate, function () {console.log(`Latency: ${Date.now()-start}ms`)});
+    refinedGamestate = {...gamestate}
+    delete refinedGamestate.colours
+    io.to(room).emit("new-gamestate", gamestate);
     if (gamestate.party == true) {
       clearInterval(interval)
       partyInterval(room, gamestate)
