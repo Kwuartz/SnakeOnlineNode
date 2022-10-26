@@ -116,8 +116,10 @@ io.on("connection", (socket) => {
     if (multiplayerGame) {
       const userName = multiplayerPlayers[socket.id]
       if (userName) {
-        multiplayerGame.colours.push(multiplayerGame.players[userName].snakeColour)
-        delete multiplayerGame.players[userName];
+        if (multiplayerGame.players[userName]) {
+          multiplayerGame.colours.push(multiplayerGame.players[userName].snakeColour)
+          delete multiplayerGame.players[userName];
+        }
         delete multiplayerPlayers[socket.id];
         if (Object.keys(multiplayerGame.players).length == 0) {
           delete multiplayerGame
