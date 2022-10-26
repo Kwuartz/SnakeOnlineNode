@@ -1,12 +1,5 @@
 const socket = io();
 
-setInterval(() => {
-  const start = Date.now();
-  socket.volatile.emit("ping", () => {
-    console.log(`Latency: ${Date.now()-start}ms`)
-  });
-}, 5000);
-
 const gameBoard = document.getElementById("game");
 
 const foodColour = "red";
@@ -253,7 +246,11 @@ socket.on("username-taken", () => {
   })
 })
 
+let lastUpdate = 0
+
 socket.on("new-gamestate", (gamestate, ping) => {
+  console.log(Date.now() - lastUpdate)
+  lastUpdate = Date.now()
   ping()
   game = gamestate;
   if (canvas && game.players[userName]) {
