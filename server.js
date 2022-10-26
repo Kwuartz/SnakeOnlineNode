@@ -205,6 +205,8 @@ function gameInterval(room, gamestate) {
   }, 1000 / FPS);
 }
 
+
+// Double speed when on party mode
 function partyInterval(room, gamestate) {
   let timeOut = 0
   const interval = setInterval(() => {
