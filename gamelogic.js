@@ -224,7 +224,7 @@ function movePlayer(player) {
   return player
 }
 
-function getSpawn(player, players) {
+async function getSpawn(player, players) {
   let spawnPos = {
     x: Math.round(Math.random() * (GRIDSIZE - 10)) + 5,
     y: Math.round(Math.random() * (GRIDSIZE - 10)) + 5,
