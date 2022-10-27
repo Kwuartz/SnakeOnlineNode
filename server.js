@@ -193,10 +193,13 @@ io.on("connection", (socket) => {
 function gameInterval(room, gamestate) {
   // To make sure timeout only runs once
   let timeOut = false
+  let update = true
   // Game interval
   const interval = setInterval(() => {
-    gamestate = gameLoop(gamestate);
-    refinedGamestate = {...gamestate}
+    if (update) {
+      gamestate = gameLoop(gamestate);
+    } else {update = true}
+    let refinedGamestate = {...gamestate}
     delete refinedGamestate.colours
     io.to(room).emit("new-gamestate", refinedGamestate);
     if (gamestate.party == true) {
@@ -215,7 +218,7 @@ function gameInterval(room, gamestate) {
         }
       }, 10000)
     }
-  }, 1000 / FPS);
+  }, 1000 / FPS * 2);
 }
 
 
@@ -224,7 +227,9 @@ function partyInterval(room, gamestate) {
   let timeOut = false
   const interval = setInterval(() => {
     gamestate = gameLoop(gamestate);
-    io.to(room).emit("new-gamestate", gamestate);
+    refinedGamestate = {...gamestate}
+    delete refinedGamestate.colours
+    io.to(room).emit("new-gamestate", refinedGgamestate);
     if (gamestate.party == false) {
       clearInterval(interval)
       gameInterval(room, gamestate)
