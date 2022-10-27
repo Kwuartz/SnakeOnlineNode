@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 3000;
-const customParser = require('socket.io-msgpack-parser');
+const msgpackParser = require('socket.io-msgpack-parser');
 const io = require("socket.io")(http, {
   cors: {
     origin: [
@@ -17,7 +17,7 @@ const io = require("socket.io")(http, {
     credentials: true
   },
   allowEIO3: true,
-  parser: customParser
+  parser: msgpackParser
 });
 
 const  { instrument } = require("@socket.io/admin-ui");
