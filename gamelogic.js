@@ -1,6 +1,4 @@
-const { FPS } = require("./constants");
-const { GRIDSIZE } = require("./constants");
-const { COLOURS } = require("./constants");
+const { COLOURS, GRIDSIZE, FPS, POWERUPCHANCE } = require("./constants");
 
 module.exports = {
   createGameState,
@@ -19,6 +17,7 @@ function createGameState() {
         y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
       }
     }),
+    powerupPos: [],
     gridSize: GRIDSIZE,
     fps: FPS,
     party: false,
@@ -45,6 +44,11 @@ function createNewPlayer(gamestate) {
 function gameLoop(game) {
   let players = game.players;
   let foodPos = game.foodPos;
+
+  // Random chance to spawn powerup
+  if (Math.round(Math.random() * POWERUPCHANCE) == 50) {
+    spawnPowerup()
+  }
 
   // Moves the players snakes and adds new segments
   for (playerName in players) {
@@ -268,5 +272,5 @@ function getSpawn(player, players) {
 }
 
 function spawnPowerup() {
-
+  console.log("Power up spawned")
 }

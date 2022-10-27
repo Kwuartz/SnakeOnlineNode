@@ -11,8 +11,11 @@ const COLOURS = [
   "#9B26B6", // Violet
 ];
 
+const POWERUPCHANCE = 100;
+
 module.exports = {
   GRIDSIZE,
   FPS,
   COLOURS,
+  POWERUPCHANCE
 };
