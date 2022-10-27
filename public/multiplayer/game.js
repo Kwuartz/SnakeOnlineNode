@@ -1,5 +1,3 @@
-const socket = io();
-
 const gameBoard = document.getElementById("game");
 
 const foodColour = "red";
