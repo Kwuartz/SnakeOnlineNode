@@ -9,6 +9,8 @@ const io = require("socket.io")(http, {
       "http://localhost:3000",  
       "https://admin.socket.io",
       "https://snake-online-dan.herokuapp.com",
+      "http://192.168.1.75",
+      "http://snakeonline.ddns.net"
     ],
     methods: ["GET", "POST"],
     transports: ['websocket', 'polling'],
