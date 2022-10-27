@@ -232,7 +232,8 @@ function getSpawn(player, players) {
 
   // Checks if any other player in general area and makes sure that it only checks a certain number of times before giving up
   let empty = false;
-  while (!empty) {
+  let timesRun = 0
+  while (!empty && timesRun < 50) {
     empty = true;
     for (otherPlayer in players) {
       if (!empty) {
@@ -255,6 +256,7 @@ function getSpawn(player, players) {
                 x: Math.round(Math.random() * (GRIDSIZE - 20)) + 5,
                 y: Math.round(Math.random() * (GRIDSIZE - 20)) + 5,
               };
+              timesRun++
             }
           }
         }
