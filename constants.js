@@ -1,5 +1,5 @@
-const GRIDSIZE = 45;
-const FPS = 15;
+const GRIDSIZE = 30;
+const FPS = 10;
 const COLOURS = [
   "#C2272D", // Tomato
   "#F8931F", // Orange

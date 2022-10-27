@@ -238,7 +238,7 @@ function gameLoop(game) {
         // Check if player is on food
         foodPos.forEach((food, foodIndex) => {
           if (headPos.x == food.x && headPos.y == food.y) {
-            player.newSegments += 7;
+            player.newSegments += 3;
             game = generateFood(game, food);
           }
         });
@@ -301,8 +301,8 @@ function getColour(colours) {
 
 function getSpawn(player, players) {
   let spawnPos = {
-    x: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
-    y: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
+    x: Math.round(Math.random() * (GRIDSIZE - 10)) + 5,
+    y: Math.round(Math.random() * (GRIDSIZE - 10)) + 5,
   };
 
   // Checks if any other player in general area and makes sure that it only checks a certain number of times before giving up
@@ -327,8 +327,8 @@ function getSpawn(player, players) {
               console.log(spawnPos);
               empty = false;
               spawnPos = {
-                x: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
-                y: Math.round(Math.random() * (GRIDSIZE - 20)) + 10,
+                x: Math.round(Math.random() * (GRIDSIZE - 20)) + 5,
+                y: Math.round(Math.random() * (GRIDSIZE - 20)) + 5,
               };
             }
           }

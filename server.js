@@ -158,10 +158,10 @@ io.on("connection", (socket) => {
     if (gameType == "multiplayer") {
       userName = multiplayerPlayers[socket.id]
       if (multiplayerGame.players[userName]) {
-        multiplayerGame.players[userName].speedIncrease += 10
+        multiplayerGame.players[userName].speedIncrease += 5
       }
     } else {
-      singlePlayerGames[socket.id].players["player"].speedIncrease += 10 
+      singlePlayerGames[socket.id].players["player"].speedIncrease += 5 
     }
   })
 
