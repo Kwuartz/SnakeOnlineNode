@@ -25,3 +25,27 @@ Swal.fire({
 }).then((result) => {
   socket.emit("new-multiplayer", result.value.username);
 })
+
+socket.on("player-died", () => {
+  Swal.fire({
+    titleText: "Respawning...",
+    html: 'You will respawn in <timer></timer> seconds.',
+    timer: 3500,
+    timerProgressBar: true,
+    allowEscapeKey: false,
+    allowOutsideClick: false,
+    width: "25vw",
+    didOpen: () => {
+      Swal.showLoading()
+      const respawnTimer = Swal.getHtmlContainer().querySelector('timer')
+      timerInterval = setInterval(() => {
+        respawnTimer.textContent = Math.round(Swal.getTimerLeft()/1000)
+      }, 100)
+    },
+    willClose: () => {
+      clearInterval(timerInterval)
+    }
+  }).then((result) => {
+    socket.emit("player-respawn", userName, "multiplayer")
+  })
+})
