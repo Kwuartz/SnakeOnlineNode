@@ -224,7 +224,7 @@ function movePlayer(player) {
   return player
 }
 
-async function getSpawn(player, players) {
+function getSpawn(player, players) {
   let spawnPos = {
     x: Math.round(Math.random() * (GRIDSIZE - 10)) + 5,
     y: Math.round(Math.random() * (GRIDSIZE - 10)) + 5,
@@ -233,7 +233,7 @@ async function getSpawn(player, players) {
   // Checks if any other player in general area and makes sure that it only checks a certain number of times before giving up
   let empty = false;
   let timesRun = 0
-  while (!empty && timesRun < 50) {
+  while (!empty && timesRun < 10) {
     empty = true;
     for (otherPlayer in players) {
       if (!empty) {
@@ -250,7 +250,6 @@ async function getSpawn(player, players) {
               (spawnPos.x - xPos == segment.x && spawnPos.y - yPos == segment.y) ||
               (spawnPos.x + xPos == segment.x && spawnPos.y - yPos == segment.y)
             ) {
-              console.log(spawnPos);
               empty = false;
               spawnPos = {
                 x: Math.round(Math.random() * (GRIDSIZE - 20)) + 5,
