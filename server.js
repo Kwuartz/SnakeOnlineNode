@@ -10,7 +10,7 @@ const io = require("socket.io")(http, {
       "https://admin.socket.io",
       "https://snake-online-dan.herokuapp.com",
       "http://192.168.1.75",
-      "http://snakeonline.ddns.net"
+      "http://snakeonline.ddns.net",
     ],
     methods: ["GET", "POST"],
     transports: ['websocket', 'polling'],
@@ -26,7 +26,7 @@ instrument(io, {
 });
 
 const { FPS } = require("./constants");
-const { createGameState, createNewPlayer, changeDirection, gameLoop } = require("./game");
+const { createGameState, createNewPlayer, changeDirection, gameLoop } = require("./gamelogic");
 
 const multiplayerPlayers = {};
 let multiplayerGame;
@@ -63,23 +63,23 @@ io.on("connection", (socket) => {
     if (Object.values(multiplayerPlayers).includes(userName)) {
       socket.emit("username-taken")
     } else {
-      if (multiplayerGame) {
-        socket.join(multiplayerRoom)
-        multiplayerPlayers[socket.id] = userName;
-        console.log(userName + " has connected!");
-        socket.emit("player-connected", userName);
-        multiplayerGame.players[userName] = createNewPlayer(multiplayerGame);
-      } else {
+      if (!multiplayerGame) {
         multiplayerGame = createGameState();
-
-        multiplayerGame.players[userName] = createNewPlayer(multiplayerGame);
-        socket.join(multiplayerRoom)
-        multiplayerPlayers[socket.id] = userName;
-        socket.emit("player-connected", userName);
-
         gameInterval(multiplayerRoom, multiplayerGame);
-        console.log(`New multiplayer game instance created because ${userName} joined!`)
+        console.log(`New multiplayer game instance created!`)
       }
+      
+      socket.join(multiplayerRoom)
+      multiplayerPlayers[socket.id] = userName;
+      console.log(userName + " has connected!");
+      socket.emit("player-connected", userName);
+      multiplayerGame.players[userName] = createNewPlayer(multiplayerGame);
+
+      // Sending initial game state
+      let initialGamestate = {...multiplayerGame}
+      delete initialGamestate.interval
+      delete initialGamestate.colours
+      socket.emit("new-gamestate", initialGamestate)
     }
   });
 
@@ -89,6 +89,12 @@ io.on("connection", (socket) => {
     singlePlayerGames[socket.id].players["player"] = createNewPlayer(singlePlayerGames[socket.id])
     gameInterval(socket.id, singlePlayerGames[socket.id])
     socket.emit("player-connected")
+
+    // Sending initial game state
+    let initialGamestate = {...singlePlayerGames[socket.id]}
+    delete initialGamestate.interval
+    delete initialGamestate.colours
+    socket.emit("new-gamestate", initialGamestate)
   })
 
   socket.on("player-respawn", (userName, gameType) => {
@@ -231,20 +237,17 @@ function reduceGamestate(newGamestate, oldGamestate) {
   refinedGamestate.players = {}
   for (newPlayerName in newGamestate.players) {
     newPlayer = newGamestate.players[newPlayerName]
-    refinedGamestate.players[newPlayerName] = {}
-    refinedGamestate.players[newPlayerName].headPos = newPlayer.headPos
-    refinedGamestate.players[newPlayerName].segments = newPlayer.segments
-    refinedGamestate.players[newPlayerName].dead = newGamestate.players[newPlayerName].dead
-    if (!oldGamestate.players[newPlayerName]) {
-      refinedGamestate.players[newPlayerName].snakeColour = newGamestate.players[newPlayerName].snakeColour
+    refinedGamestate.players[newPlayerName] = {
+      headPos: newPlayer.headPos,
+      segments: newPlayer.segments,
+      dead: newGamestate.players[newPlayerName].dead,
+      snakeColour: newGamestate.players[newPlayerName].snakeColour
     }
   }
   return refinedGamestate
 }
 
 function gameInterval(room, gamestate) {
-  // Emit initial gamestate
-  io.to(room).emit("new-gamestate", gamestate);
   // Game interval
   gamestate.interval = setInterval(() => {
     let newGamestate = gameLoop(gamestate);
