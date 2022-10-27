@@ -215,7 +215,7 @@ function gameInterval(room, gamestate) {
         }
       }, 10000)
     }
-  }, 1000 / FPS * 2);
+  }, 1000 / FPS);
 }
 
 
