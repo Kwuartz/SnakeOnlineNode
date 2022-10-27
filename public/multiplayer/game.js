@@ -1,13 +1,11 @@
-const socket = io()
-
 const gameBoard = document.getElementById("game");
 
 const foodColour = "red";
 const foodLeafColour = "green";
 const foodImage = new Image();
-foodImage.src = "../assets/images/apple.png"
+foodImage.src = "../assets/images/apple.png";
 
-let bg = "#79cf44"
+let bg = "#79cf44";
 
 const partyColors = [
   "#f02f22", // Tomato
@@ -20,13 +18,14 @@ const partyColors = [
   "#fab505", // Gold
 ];
 
-let context, canvas, game;
+let context, canvas;
+let localGame = false;
 
 let lastDirectionChange = 0;
-let inputDelay
+let inputDelay;
 
 let lastBgChange = 0;
-let bgDelay = 700
+let bgDelay = 700;
 
 let eat = new Audio("../assets/sounds/eat.mp3")
 let death = new Audio("../assets/sounds/death.mp3")
@@ -44,23 +43,25 @@ function init() {
   canvas = document.getElementById("canvas");
   context = canvas.getContext("2d");
   canvas.width = canvas.height = 900;
-  context.font = "1.2rem Monospace"
+  context.font = "1.2rem Monospace";
 }
 
 function resetBoard(gridSize) {
   const size = (canvas.width / gridSize);
-  const gridArray = [...Array(gridSize).keys()]
-  if (!bg) {bg = "#79cf44"}
-  let darkBg = darkenColor(bg, -5)
+  const gridArray = [...Array(gridSize).keys()];
+
+  if (!bg) {bg = "#79cf44"};
+  let darkBg = darkenColor(bg, -5);
+
   for (row in gridArray) {
     for (collumn in gridArray) {
       if (collumn % 2 == 0 && row % 2 == 0) {
-        context.fillStyle = bg
+        context.fillStyle = bg;
         context.fillRect(row * size, collumn * size, size, size);
       } else {
         context.fillStyle = darkBg
         if (collumn % 2 == 1 && row % 2 == 1) {
-          context.fillStyle = bg
+          context.fillStyle = bg;
         }
         context.fillRect(row * size, collumn * size, size, size);
       }
@@ -150,7 +151,7 @@ function getKeys(key) {
 }
 
 window.addEventListener("keydown", (event) => {
-  if (game) {
+  if (localGame) {
     movementDirection = getKeys(event.key);
     if (lastDirectionChange < Date.now() - inputDelay) {
       lastDirectionChange = Date.now();
@@ -165,49 +166,25 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-socket.on("username-taken", () => {
-  Swal.fire({
-    titleText: "This username is taken!",
-    inputPlaceholder: "Enter another username!",
-    html: `<input type="text" id="username" class="swal2-input" placeholder="Enter your username!">`,
-    inputAttributes: {
-      autocapitalize: "off",
-      autocorrect: "off",
-      maxLength: 20,
-    },
-    confirmButtonText: 'Play',
-    showLoaderOnConfirm: true,
-    allowEscapeKey: false,
-    allowOutsideClick: false,
-    preConfirm: () => {
-      const username = Swal.getPopup().querySelector('#username').value
-      if (!username) {
-        Swal.showValidationMessage("Your username cannot be blank!")
-      }
-      return {username:username};
-    }
-  }).then((result) => {
-    socket.emit("new-multiplayer", result.value.username);
-  })
-})
-
-let lastUpdate = 0
-
 socket.on("new-gamestate", (gamestate) => {
-  game = gamestate;
-  if (canvas && game.players[userName]) {
-    if (game.players[userName].dead == false) { 
-      requestAnimationFrame(() => drawGame(game));
+  if (!localGame) {localGame = gamestate} else {
+    localGame = {...localGame, ...gamestate}
+  }
+
+  if (canvas && localGame.players[userName]) {
+    if (localGame.players[userName].dead == false) { 
+      drawGame(localGame)
     } else {
       death.play()
       socket.emit("player-death", "multiplayer")
       socket.emit("server-message", userName + " has died!");
     }
-    if (game.players[userName].newSegments == 4) {
+
+    if (localGame.players[userName].newSegments == 4) {
       eat.play()
     }
 
-    inputDelay = 800 / game.fps
+    inputDelay = 800 / localGame.fps
   }
 });
 

@@ -63,17 +63,23 @@ io.on("connection", (socket) => {
     if (Object.values(multiplayerPlayers).includes(userName)) {
       socket.emit("username-taken")
     } else {
-      if (multiplayerGame) {} else {
+      if (multiplayerGame) {
+        socket.join(multiplayerRoom)
+        multiplayerPlayers[socket.id] = userName;
+        console.log(userName + " has connected!");
+        socket.emit("player-connected", userName);
+        multiplayerGame.players[userName] = createNewPlayer(multiplayerGame);
+      } else {
         multiplayerGame = createGameState();
-        gameInterval(multiplayerRoom, multiplayerGame);
-        console.log("New multiplayer game instance created!")
-      }
 
-      socket.join(multiplayerRoom)
-      multiplayerPlayers[socket.id] = userName;
-      console.log(userName + " has connected!");
-      socket.emit("player-connected", userName);
-      multiplayerGame.players[userName] = createNewPlayer(multiplayerGame);
+        multiplayerGame.players[userName] = createNewPlayer(multiplayerGame);
+        socket.join(multiplayerRoom)
+        multiplayerPlayers[socket.id] = userName;
+        socket.emit("player-connected", userName);
+
+        gameInterval(multiplayerRoom, multiplayerGame);
+        console.log(`New multiplayer game instance created because ${userName} joined!`)
+      }
     }
   });
 
@@ -124,8 +130,9 @@ io.on("connection", (socket) => {
           deleteMultiTimeOut = true
           setTimeout(() => {
             if (Object.keys(multiplayerGame.players).length <= 0) {
+              clearInterval(multiplayerGame.interval)
               multiplayerGame = undefined
-              console.log("Multiplayer game instance terminated!")
+              console.log("Multiplayer game and interval instance terminated!")
             } else {
               deleteMultiTimeOut = false
             }
@@ -177,6 +184,7 @@ io.on("connection", (socket) => {
         multiplayerGame.party = false
       } else {
         multiplayerGame.party = true
+        console.log("PARTY")
       }
     } else if (message == "stop party") {
       multiplayerGame.party = false
@@ -190,57 +198,76 @@ io.on("connection", (socket) => {
   })
 });
 
-function gameInterval(room, gamestate) {
-  // To make sure timeout only runs once
-  let timeOut = false
-  // Game interval
-  const interval = setInterval(() => {
-    gamestate = gameLoop(gamestate);
-    let refinedGamestate = {...gamestate}
-    delete refinedGamestate.colours
-    io.to(room).emit("new-gamestate", refinedGamestate);
-    if (gamestate.party == true) {
-      clearInterval(interval)
-      partyInterval(room, gamestate)
+function reduceGamestate(newGamestate, oldGamestate) {
+  // Checking game settings
+  let refinedGamestate = {}
+  if (newGamestate.gridSize != oldGamestate.gridSize) {
+    refinedGamestate.gridSize = newGamestate.gridSize
+  }
+  if (newGamestate.fps != oldGamestate.fps) {
+    refinedGamestate.fps = newGamestate.fps
+  }
+  if (newGamestate.party != oldGamestate.party) {
+    refinedGamestate.party = newGamestate.party
+  }
+
+  // Checking food pos
+  newGamestate.foodPos.forEach((newFoodPos) => {
+    let isNew = false
+    oldGamestate.foodPos.forEach((oldFoodPos) => {
+      if (newFoodPos.x != oldFoodPos.x && newFoodPos.y != oldFoodPos.y) {
+        isNew = true
+      }
+    })
+    if (isNew) {
+      if (!refinedGamestate.foodPos) {
+        refinedGamestate.foodPos = []
+      }
+      refinedGamestate.foodPos.push(newFoodPos)
     }
-    // Check if game ended
-    if (timeOut == false && Object.keys(gamestate.players).length < 1) {
-      timeOut = true
-      setTimeout(() => {
-        if (Object.keys(gamestate.players).length < 1) {
-          console.log("Interval cleared!")
-          clearInterval(interval)
-        } else {
-          timeOut = false
-        }
-      }, 10000)
+  })
+
+  // Checking players
+  refinedGamestate.players = {}
+  for (newPlayerName in newGamestate.players) {
+    newPlayer = newGamestate.players[newPlayerName]
+    refinedGamestate.players[newPlayerName] = {}
+    refinedGamestate.players[newPlayerName].headPos = newPlayer.headPos
+    refinedGamestate.players[newPlayerName].segments = newPlayer.segments
+    refinedGamestate.players[newPlayerName].dead = newGamestate.players[newPlayerName].dead
+    if (!oldGamestate.players[newPlayerName]) {
+      refinedGamestate.players[newPlayerName].snakeColour = newGamestate.players[newPlayerName].snakeColour
+    }
+  }
+  return refinedGamestate
+}
+
+function gameInterval(room, gamestate) {
+  // Emit initial gamestate
+  io.to(room).emit("new-gamestate", gamestate);
+  // Game interval
+  gamestate.interval = setInterval(() => {
+    let newGamestate = gameLoop(gamestate);
+    let reducedGamestate = reduceGamestate(newGamestate, gamestate);
+    gamestate = newGamestate
+    io.to(room).emit("new-gamestate", reducedGamestate);
+    if (gamestate.party == true) {
+      clearInterval(gamestate.interval)
+      partyInterval(room, gamestate)
     }
   }, 1000 / FPS);
 }
 
-
 // Double speed when on party mode
 function partyInterval(room, gamestate) {
-  let timeOut = false
-  const interval = setInterval(() => {
+  gamestate.interval = setInterval(() => {
     gamestate = gameLoop(gamestate);
     refinedGamestate = {...gamestate}
     delete refinedGamestate.colours
     io.to(room).emit("new-gamestate", refinedGamestate);
     if (gamestate.party == false) {
-      clearInterval(interval)
+      clearInterval(gamestate.interval)
       gameInterval(room, gamestate)
-    }
-    if (timeOut == false && Object.keys(gamestate.players).length < 1) {
-      timeOut = true
-      setTimeout(() => {
-        if (Object.keys(gamestate.players).length < 1) {
-          console.log("Interval cleared!")
-          clearInterval(interval)
-        } else {
-          timeOut = false
-        }
-      }, 10000)
     }
   }, 1000 / (FPS * 2));
 }

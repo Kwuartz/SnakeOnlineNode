@@ -26,6 +26,32 @@ Swal.fire({
   socket.emit("new-multiplayer", result.value.username);
 })
 
+socket.on("username-taken", () => {
+  Swal.fire({
+    titleText: "This username is taken!",
+    inputPlaceholder: "Enter another username!",
+    html: `<input type="text" id="username" class="swal2-input" placeholder="Enter your username!">`,
+    inputAttributes: {
+      autocapitalize: "off",
+      autocorrect: "off",
+      maxLength: 20,
+    },
+    confirmButtonText: 'Play',
+    showLoaderOnConfirm: true,
+    allowEscapeKey: false,
+    allowOutsideClick: false,
+    preConfirm: () => {
+      const username = Swal.getPopup().querySelector('#username').value
+      if (!username) {
+        Swal.showValidationMessage("Your username cannot be blank!")
+      }
+      return {username:username};
+    }
+  }).then((result) => {
+    socket.emit("new-multiplayer", result.value.username);
+  })
+})
+
 socket.on("player-died", () => {
   Swal.fire({
     titleText: "Respawning...",
