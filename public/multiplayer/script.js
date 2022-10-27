@@ -1,5 +1,3 @@
-const socket = io();
-
 Swal.fire({
   titleText: "Submit your username!",
   inputPlaceholder: "Enter your username",

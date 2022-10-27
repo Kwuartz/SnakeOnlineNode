@@ -1,3 +1,5 @@
+const socket = io()
+
 const gameBoard = document.getElementById("game");
 
 const foodColour = "red";
@@ -30,6 +32,13 @@ let eat = new Audio("../assets/sounds/eat.mp3")
 let death = new Audio("../assets/sounds/death.mp3")
 
 let userName;
+
+socket.on("player-connected", (playerName) => {
+  console.log(playerName + " has connected!");
+  socket.emit("server-message", playerName + " has connected!");
+  userName = playerName;
+  init();
+});
 
 function init() {
   canvas = document.getElementById("canvas");
@@ -154,13 +163,6 @@ window.addEventListener("keydown", (event) => {
       }
     }
   }
-});
-
-socket.on("player-connected", (playerName) => {
-  console.log(playerName + " has connected!");
-  socket.emit("server-message", playerName + " has connected!");
-  userName = playerName;
-  init();
 });
 
 socket.on("username-taken", () => {
