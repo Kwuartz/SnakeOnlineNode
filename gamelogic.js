@@ -79,7 +79,7 @@ function gameLoop(game) {
   return game;
 }
 
-function changeDirection(direction, player) {
+async function changeDirection(direction, player) {
   if (!player) {return}
   let currentDirection = player.movementDirection;
   if (
@@ -101,7 +101,7 @@ function addSegment(player, segment) {
   return player;
 }
 
-async function generateFood(game, food) {
+async function generateFood(foodPos, food) {
   let newFoodPos = {
     x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
     y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
@@ -112,8 +112,9 @@ async function generateFood(game, food) {
       y: Math.round(Math.random() * (GRIDSIZE - 1)) + 1,
     };
   }
-  game.foodPos[game.foodPos.indexOf(food)] = newFoodPos;
-  return game;
+
+  foodPos[game.foodPos.indexOf(food)] = newFoodPos;
+  return foodPos;
 }
 
 function getColour(colours) {
@@ -122,7 +123,7 @@ function getColour(colours) {
   return colour;
 }
 
-function playerChecks(player, game) {
+async function playerChecks(player, game) {
   // Checks if players hits into themselves
   let segments = player.segments;
   let headPos = player.headPos;
@@ -181,7 +182,7 @@ function playerChecks(player, game) {
   foodPos.forEach((food) => {
     if (headPos.x == food.x && headPos.y == food.y) {
       player.newSegments += 7;
-      game = generateFood(game, food);
+      foodPos = generateFood(foodPos, food);
     }
   });
 
@@ -240,9 +241,7 @@ function getSpawn(player, players) {
   while (!empty && timesRun < 10) {
     empty = true;
     for (otherPlayer in players) {
-      if (!empty) {
-        break;
-      }
+      if (!empty) {break;}
       players[otherPlayer].segments.forEach((segment) => {
         for (xPos in [...Array(6).keys()]) {
           xPos = parseInt(xPos);
