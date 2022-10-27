@@ -101,7 +101,7 @@ function addSegment(player, segment) {
   return player;
 }
 
-async function generateFood(foodPos, food) {
+function generateFood(foodPos, food) {
   let newFoodPos = {
     x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
     y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
@@ -113,7 +113,7 @@ async function generateFood(foodPos, food) {
     };
   }
 
-  foodPos[game.foodPos.indexOf(food)] = newFoodPos;
+  foodPos[foodPos.indexOf(food)] = newFoodPos;
   return foodPos;
 }
 
@@ -195,7 +195,7 @@ async function playerChecks(player, game) {
   return player
 }
 
-function movePlayer(player) {
+async function movePlayer(player) {
   if (player && player.dead == false) {
     let segments = player.segments;
     let headPos = player.headPos;
