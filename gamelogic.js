@@ -97,7 +97,7 @@ function addSegment(player, segment) {
   return player;
 }
 
-function generateFood(game, food) {
+async function generateFood(game, food) {
   let newFoodPos = {
     x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
     y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
@@ -265,4 +265,8 @@ function getSpawn(player, players) {
   player.headPos = spawnPos;
   player.segments.push(spawnPos);
   return player;
+}
+
+function spawnPowerup() {
+
 }
