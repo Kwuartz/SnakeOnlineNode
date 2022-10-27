@@ -95,7 +95,7 @@ async function changeDirection(direction, player) {
   return player;
 }
 
-function addSegment(player, segment) {
+async function addSegment(player, segment) {
   player.newSegments--;
   player.segments.unshift(segment);
   return player;
@@ -115,12 +115,6 @@ function generateFood(foodPos, food) {
 
   foodPos[foodPos.indexOf(food)] = newFoodPos;
   return foodPos;
-}
-
-function getColour(colours) {
-  let colour = colours[Math.floor(Math.random() * colours.length)];
-  colours.splice(colours.indexOf(colour), 1)
-  return colour;
 }
 
 async function playerChecks(player, game) {
@@ -272,4 +266,10 @@ function getSpawn(player, players) {
 
 function spawnPowerup() {
   console.log("Power up spawned")
+}
+
+function getColour(colours) {
+  let colour = colours[Math.floor(Math.random() * colours.length)];
+  colours.splice(colours.indexOf(colour), 1)
+  return colour;
 }
