@@ -193,12 +193,9 @@ io.on("connection", (socket) => {
 function gameInterval(room, gamestate) {
   // To make sure timeout only runs once
   let timeOut = false
-  let update = true
   // Game interval
   const interval = setInterval(() => {
-    if (update) {
-      gamestate = gameLoop(gamestate);
-    } else {update = true}
+    gamestate = gameLoop(gamestate);
     let refinedGamestate = {...gamestate}
     delete refinedGamestate.colours
     io.to(room).emit("new-gamestate", refinedGamestate);
