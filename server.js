@@ -2,23 +2,23 @@ const express = require('express');
 const app = express();
 const http = require("http").Server(app);
 const port = process.env.PORT || 3000;
-const { instrument } = require("@socket.io/admin-ui");
+const customParser = require('socket.io-msgpack-parser');
 const io = require("socket.io")(http, {
   cors: {
     origin: [
       "http://localhost:3000",  
-      "http://127.0.0.1:5500",
       "https://admin.socket.io",
       "https://snake-online-dan.herokuapp.com",
-      "https://snakeonlinevercel.vercel.app"
     ],
     methods: ["GET", "POST"],
     transports: ['websocket', 'polling'],
     credentials: true
   },
-  allowEIO3: true
+  allowEIO3: true,
+  parser: customParser
 });
 
+const  { instrument } = require("@socket.io/admin-ui");
 instrument(io, {
   auth: false,
 });

@@ -92,6 +92,7 @@ function sleep(milliseconds){
 function resetBoard(gridSize) {
   const size = (canvas.width / gridSize);
   const gridArray = [...Array(gridSize).keys()]
+  if (!bg) {bg = "#79cf44"}
   let darkBg = darkenColor(bg, -5)
   for (row in gridArray) {
     for (collumn in gridArray) {
