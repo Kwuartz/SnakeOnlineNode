@@ -167,11 +167,62 @@ window.addEventListener("keydown", (event) => {
 
 
 function updateGamestate(currentState, newGamestate) {
-  let updatedState = {...currentState, ...newGamestate};
-  for (newPlayerName in newGamestate.players) {
-    updatedState.players[newPlayerName] = {...currentState.players[newPlayerName], ...updatedState.players[newPlayerName]}
+  console.log(newGamestate.foodPos)
+  // Updating game settings like party mode
+  let updatedState = {...currentState, ...newGamestate}
+  // Updating foodPos
+  if (newGamestate.foodPos) {
+    console.log("FoodPos new")
+    newGamestate.foodPos.forEach((foodPos, foodIndex) => {
+      // Some will have placeholder undefined values so I can indentify index of foodPos to replace
+      if (foodPos) {
+        updatedState.foodPos[foodIndex] = foodPos
+        console.log("Foodpos updated")
+      }
+    })
   }
-  return updatedState
+
+  // Updating players whether the server has sent full player info or partial info
+  if (typeof(newGamestate.players[userName].segments) == "object") {
+    for (newPlayerName in newGamestate.players) {
+      updatedState.players[newPlayerName] = {...currentState.players[newPlayerName], ...updatedState.players[newPlayerName]}
+    }
+    return updatedState
+  } else {
+    updatedState.players = currentState.players
+
+    for (playerName in updatedState.players) {
+      let player = updatedState.players[playerName]
+      let segments = player.segments;
+      let headPos = player.headPos;
+      let newSegment
+    
+      // If the player is waiting to have new segments added make a copy of the last segment before it moves and then add it afterwards
+      if (player.segments.length < newGamestate.players[playerName].segments) {
+        newSegment = {...segments[0]};
+      }
+    
+      // Moves players
+      for (segmentIndex in segments) {
+        let segment = segments[parseInt(segmentIndex)];
+        if (segmentIndex == segments.length - 1) {
+          headPos.x = newGamestate.players[playerName].headPos.x
+          headPos.y = newGamestate.players[playerName].headPos.y
+          segment.x = headPos.x
+          segment.y = headPos.y
+        } else {
+          nextSegment = segments[parseInt(segmentIndex) + 1];
+          segment.x = nextSegment.x;
+          segment.y = nextSegment.y;
+        }
+      }
+
+      if (newSegment) {
+        player.segments.unshift(newSegment);
+      }
+    }
+    return updatedState
+  }
 }
 
 socket.on("new-gamestate", (newGamestate) => {
@@ -186,10 +237,6 @@ socket.on("new-gamestate", (newGamestate) => {
       death.play()
       socket.emit("player-death", "multiplayer")
       socket.emit("server-message", userName + " has died!");
-    }
-
-    if (localGame.players[userName].newSegments == 4) {
-      eat.play()
     }
 
     inputDelay = 800 / localGame.fps

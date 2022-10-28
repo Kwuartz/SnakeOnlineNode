@@ -75,11 +75,11 @@ io.on("connection", (socket) => {
       socket.emit("player-connected", userName);
       multiplayerGame.players[userName] = createNewPlayer(multiplayerGame);
 
-      // Sending initial game state
-      let initialGamestate = {...multiplayerGame}
-      delete initialGamestate.interval
-      delete initialGamestate.colours
-      socket.emit("new-gamestate", initialGamestate)
+      // Sending the room the gamestate again each time a new player joins
+      let newGamestate = {...multiplayerGame}
+      delete newGamestate.interval
+      delete newGamestate.colours
+      socket.to(multiplayerRoom).emit("new-gamestate", initialGamestate)
     }
   });
 
@@ -204,45 +204,50 @@ io.on("connection", (socket) => {
   })
 });
 
-function reduceGamestate(oldGamestate, newGamestate) {
+function reduceGamestate(oldGamestate, newGamestate, sendSegments) {
   // Checking game settings
-  let refinedGamestate = {}
+  let reducedGamestate = {}
   if (newGamestate.party != oldGamestate.party) {
-    refinedGamestate.party = newGamestate.party
+    reducedGamestate.party = newGamestate.party
   }
 
   // Checking food pos
   newGamestate.foodPos.forEach((newFoodPos) => {
-    let isNew = false
+    let isNew = true
     oldGamestate.foodPos.forEach((oldFoodPos) => {
-      if (newFoodPos.x != oldFoodPos.x && newFoodPos.y != oldFoodPos.y) {
-        isNew = true
+      if (newFoodPos.x == oldFoodPos.x && newFoodPos.y == oldFoodPos.y) {
+        isNew = false
       }
     })
     if (isNew) {
-      if (!refinedGamestate.foodPos) {
-        refinedGamestate.foodPos = []
+      console.log("A new food")
+      if (!reducedGamestate.foodPos) {
+        reducedGamestate.foodPos = []
       }
-      refinedGamestate.foodPos.push(newFoodPos)
+      reducedGamestate.foodPos[indexOf(newFoodPos)] = newFoodPos
     }
   })
 
   // Checking players
-  refinedGamestate.players = {}
+  reducedGamestate.players = {}
   for (newPlayerName in newGamestate.players) {
     newPlayer = newGamestate.players[newPlayerName]
-    oldPlayer = oldGamestate.players[newPlayerName]
-    refinedGamestate.players[newPlayerName] = {
+    reducedGamestate.players[newPlayerName] = {
       headPos: newPlayer.headPos,
-      segments: newPlayer.segments,
+      segments: []
+    }
+    if (sendSegments) {
+      reducedGamestate.players[newPlayerName].segments = newPlayer.segments
+    } else {
+      reducedGamestate.players[newPlayerName].segments = newPlayer.segments.length
     }
     if (newPlayer.dead) {
-      refinedGamestate.players[newPlayerName].dead = true
+      reducedGamestate.players[newPlayerName].dead = true
     } else {
-      refinedGamestate.players[newPlayerName].dead = false
+      reducedGamestate.players[newPlayerName].dead = false
     }
   }
-  return refinedGamestate
+  return reducedGamestate
 }
 
 function gameInterval(room, gamestate) {
@@ -250,7 +255,7 @@ function gameInterval(room, gamestate) {
   gamestate.interval = setInterval(() => {
     let oldGamestate = {...gamestate}
     gamestate = gameLoop(gamestate);
-    let reducedGamestate = reduceGamestate(oldGamestate, gamestate);
+    let reducedGamestate = reduceGamestate(oldGamestate, gamestate, false);
     io.to(room).emit("new-gamestate", reducedGamestate);
 
     if (gamestate.party == true) {

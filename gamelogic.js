@@ -176,7 +176,7 @@ function playerChecks(player, game) {
   // Check if player is on food
   foodPos.forEach((food) => {
     if (headPos.x == food.x && headPos.y == food.y) {
-      player.newSegments += 7;
+      player.newSegments += 5;
       foodPos = generateFood(foodPos, food);
     }
   });

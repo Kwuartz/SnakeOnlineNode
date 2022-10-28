@@ -1,5 +1,5 @@
 const GRIDSIZE = 35;
-const FPS = 11;
+const FPS = 10;
 const COLOURS = [
   "#C2272D", // Tomato
   "#F8931F", // Orange
@@ -11,7 +11,7 @@ const COLOURS = [
   "#9B26B6", // Violet
 ];
 
-const POWERUPCHANCE = 100;
+const POWERUPCHANCE = 10000;
 
 module.exports = {
   GRIDSIZE,
