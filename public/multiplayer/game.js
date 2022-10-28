@@ -167,17 +167,15 @@ window.addEventListener("keydown", (event) => {
 
 
 function updateGamestate(currentState, newGamestate) {
-  console.log(newGamestate.foodPos)
   // Updating game settings like party mode
   let updatedState = {...currentState, ...newGamestate}
   // Updating foodPos
   if (newGamestate.foodPos) {
-    console.log("FoodPos new")
+    updatedState.foodPos = currentState.foodPos
     newGamestate.foodPos.forEach((foodPos, foodIndex) => {
       // Some will have placeholder undefined values so I can indentify index of foodPos to replace
       if (foodPos) {
         updatedState.foodPos[foodIndex] = foodPos
-        console.log("Foodpos updated")
       }
     })
   }

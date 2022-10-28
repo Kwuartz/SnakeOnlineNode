@@ -43,7 +43,6 @@ function createNewPlayer(gamestate) {
 
 function gameLoop(game) {
   let players = game.players;
-  let foodPos = game.foodPos;
 
   // Random chance to spawn powerup
   if (Math.round(Math.random() * POWERUPCHANCE) == 50) {
@@ -79,7 +78,7 @@ function gameLoop(game) {
   return game;
 }
 
-async function changeDirection(direction, player) {
+function changeDirection(direction, player) {
   if (!player) {return}
   let currentDirection = player.movementDirection;
   if (
@@ -95,7 +94,7 @@ async function changeDirection(direction, player) {
   return player;
 }
 
-async function addSegment(player, segment) {
+function addSegment(player, segment) {
   player.newSegments--;
   player.segments.unshift(segment);
   return player;
@@ -141,7 +140,7 @@ function playerChecks(player, game) {
     let oponentName = oponents[oponentIndex];
     let isPlayer = oponentName == playerName;
 
-    oponentSegments =game.players[oponentName].segments;
+    oponentSegments = game.players[oponentName].segments;
     if (isPlayer == false) {
       oponentSegments.forEach((oponentSegment, oponentSegmentIndex) => {
         if (oponentSegment) {

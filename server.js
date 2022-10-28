@@ -76,10 +76,10 @@ io.on("connection", (socket) => {
       multiplayerGame.players[userName] = createNewPlayer(multiplayerGame);
 
       // Sending the room the gamestate again each time a new player joins
-      let newGamestate = {...multiplayerGame}
-      delete newGamestate.interval
-      delete newGamestate.colours
-      socket.to(multiplayerRoom).emit("new-gamestate", initialGamestate)
+      let initialGamestate = {...multiplayerGame}
+      delete initialGamestate.interval
+      delete initialGamestate.colours
+      socket.emit("new-gamestate", initialGamestate)
     }
   });
 
@@ -215,16 +215,16 @@ function reduceGamestate(oldGamestate, newGamestate, sendSegments) {
   newGamestate.foodPos.forEach((newFoodPos) => {
     let isNew = true
     oldGamestate.foodPos.forEach((oldFoodPos) => {
-      if (newFoodPos.x == oldFoodPos.x && newFoodPos.y == oldFoodPos.y) {
+      if (newFoodPos.x === oldFoodPos.x && newFoodPos.y === oldFoodPos.y) {
         isNew = false
       }
     })
+
     if (isNew) {
-      console.log("A new food")
       if (!reducedGamestate.foodPos) {
         reducedGamestate.foodPos = []
       }
-      reducedGamestate.foodPos[indexOf(newFoodPos)] = newFoodPos
+      reducedGamestate.foodPos[newGamestate.foodPos.indexOf(newFoodPos)] = newFoodPos
     }
   })
 
@@ -241,6 +241,9 @@ function reduceGamestate(oldGamestate, newGamestate, sendSegments) {
     } else {
       reducedGamestate.players[newPlayerName].segments = newPlayer.segments.length
     }
+    if (newPlayer.speedIncrease) {
+      reducedGamestate.players[newPlayerName].speedIncrease = true
+    }
     if (newPlayer.dead) {
       reducedGamestate.players[newPlayerName].dead = true
     } else {
@@ -251,11 +254,19 @@ function reduceGamestate(oldGamestate, newGamestate, sendSegments) {
 }
 
 function gameInterval(room, gamestate) {
+  let lastFullState = 0
   // Game interval
   gamestate.interval = setInterval(() => {
-    let oldGamestate = {...gamestate}
+    let oldGamestate = JSON.parse(JSON.stringify(gamestate))
+    let reducedGamestate
     gamestate = gameLoop(gamestate);
-    let reducedGamestate = reduceGamestate(oldGamestate, gamestate, false);
+    if (lastFullState) {
+      reducedGamestate = reduceGamestate(oldGamestate, gamestate, false);
+      lastFullState--
+    } else {
+      reducedGamestate = reduceGamestate(oldGamestate, gamestate, true);
+      lastFullState = 3
+    }
     io.to(room).emit("new-gamestate", reducedGamestate);
 
     if (gamestate.party == true) {
