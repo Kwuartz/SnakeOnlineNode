@@ -160,17 +160,17 @@ function playerChecks(player, game) {
 
   // Checks if player hits into wall and sends them to other side
   if (headPos.x >= GRIDSIZE) {
-    headPos.x = -1
+    headPos.x = 0
   }
   else if (headPos.x < 0) {
-    headPos.x = GRIDSIZE
+    headPos.x = GRIDSIZE - 1
   }
 
   if (headPos.y >= GRIDSIZE) {
-    headPos.y = -1
+    headPos.y = 0
   }
   else if (headPos.y < 0) {
-    headPos.y = GRIDSIZE
+    headPos.y = GRIDSIZE - 1
   }
 
   // Check if player is on food
