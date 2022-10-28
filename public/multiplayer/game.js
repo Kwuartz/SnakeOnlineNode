@@ -165,9 +165,19 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-socket.on("new-gamestate", (gamestate) => {
-  if (!localGame) {localGame = gamestate} else {
-    localGame = {...localGame, ...gamestate}
+
+function updateGamestate(currentState, newGamestate) {
+  let updatedState = {...currentState, ...newGamestate};
+  for (newPlayerName in newGamestate.players) {
+    updatedState.players[newPlayerName] = {...currentState.players[newPlayerName], ...updatedState.players[newPlayerName]}
+  }
+  console.log(updatedState.players["a"].dead);
+  return updatedState
+}
+
+socket.on("new-gamestate", (newGamestate) => {
+  if (!localGame) {localGame = {...newGamestate}} else {
+    localGame = updateGamestate(localGame, newGamestate)
   }
 
   if (canvas && localGame.players[userName]) {

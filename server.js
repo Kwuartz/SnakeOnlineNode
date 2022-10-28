@@ -204,15 +204,9 @@ io.on("connection", (socket) => {
   })
 });
 
-function reduceGamestate(newGamestate, oldGamestate) {
+function reduceGamestate(oldGamestate, newGamestate) {
   // Checking game settings
   let refinedGamestate = {}
-  if (newGamestate.gridSize != oldGamestate.gridSize) {
-    refinedGamestate.gridSize = newGamestate.gridSize
-  }
-  if (newGamestate.fps != oldGamestate.fps) {
-    refinedGamestate.fps = newGamestate.fps
-  }
   if (newGamestate.party != oldGamestate.party) {
     refinedGamestate.party = newGamestate.party
   }
@@ -237,11 +231,15 @@ function reduceGamestate(newGamestate, oldGamestate) {
   refinedGamestate.players = {}
   for (newPlayerName in newGamestate.players) {
     newPlayer = newGamestate.players[newPlayerName]
+    oldPlayer = oldGamestate.players[newPlayerName]
     refinedGamestate.players[newPlayerName] = {
       headPos: newPlayer.headPos,
       segments: newPlayer.segments,
-      dead: newGamestate.players[newPlayerName].dead,
-      snakeColour: newGamestate.players[newPlayerName].snakeColour
+    }
+    if (newPlayer.dead) {
+      refinedGamestate.players[newPlayerName].dead = true
+    } else {
+      refinedGamestate.players[newPlayerName].dead = false
     }
   }
   return refinedGamestate
@@ -250,10 +248,11 @@ function reduceGamestate(newGamestate, oldGamestate) {
 function gameInterval(room, gamestate) {
   // Game interval
   gamestate.interval = setInterval(() => {
-    let newGamestate = gameLoop(gamestate);
-    let reducedGamestate = reduceGamestate(newGamestate, gamestate);
-    gamestate = newGamestate
+    let oldGamestate = {...gamestate}
+    gamestate = gameLoop(gamestate);
+    let reducedGamestate = reduceGamestate(oldGamestate, gamestate);
     io.to(room).emit("new-gamestate", reducedGamestate);
+
     if (gamestate.party == true) {
       clearInterval(gamestate.interval)
       partyInterval(room, gamestate)

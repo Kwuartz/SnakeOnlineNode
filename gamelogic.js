@@ -106,6 +106,7 @@ function generateFood(foodPos, food) {
     x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
     y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
   };
+  
   if (newFoodPos.x == food.x && newFoodPos.y == food.y) {
     newFoodPos = {
       x: Math.round(Math.random() * (GRIDSIZE - 1)),
@@ -117,7 +118,7 @@ function generateFood(foodPos, food) {
   return foodPos;
 }
 
-async function playerChecks(player, game) {
+function playerChecks(player, game) {
   // Checks if players hits into themselves
   let segments = player.segments;
   let headPos = player.headPos;
@@ -180,16 +181,10 @@ async function playerChecks(player, game) {
     }
   });
 
-  // Kills player
-  if (player.dead == true) {
-    player.segments = [];
-    console.log(playerName + " has died");
-  }
-
   return player
 }
 
-async function movePlayer(player) {
+function movePlayer(player) {
   if (player && player.dead == false) {
     let segments = player.segments;
     let headPos = player.headPos;
