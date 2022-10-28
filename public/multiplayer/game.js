@@ -171,7 +171,6 @@ function updateGamestate(currentState, newGamestate) {
   for (newPlayerName in newGamestate.players) {
     updatedState.players[newPlayerName] = {...currentState.players[newPlayerName], ...updatedState.players[newPlayerName]}
   }
-  console.log(updatedState.players["a"].dead);
   return updatedState
 }
 
