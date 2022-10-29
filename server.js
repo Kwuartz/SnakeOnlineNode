@@ -238,7 +238,7 @@ function reduceGamestate(oldGamestate, newGamestate, sendSegments) {
     reducedGamestate.players[newPlayerName] = {
       headPos: newPlayer.headPos,
       segments: [],
-      speedIncrease: newPlayer.speedIncrease
+      movementDirection: newPlayer.movementDirection
     }
     if (sendSegments) {
       reducedGamestate.players[newPlayerName].segments = newPlayer.segments
@@ -286,8 +286,8 @@ function partyInterval(room, gamestate) {
       reducedGamestate = reduceGamestate(oldGamestate, gamestate, false);
       lastFullState--
     } else {
-      reducedGamestate = reduceGamestate(oldGamestate, gamestate, true);
-      lastFullState = gamestate.fps * 2
+      reducedGamestate = reduceGamestate(oldGamestate, gamestate, false);
+      lastFullState = gamestate.fps * 10
     }
     io.to(room).emit("new-gamestate", reducedGamestate);
     if (gamestate.party == false) {

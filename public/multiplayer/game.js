@@ -45,7 +45,7 @@ function init() {
   context.font = "1.2rem Monospace";
 }
 
-function resetBoard(gridSize) {
+async function resetBoard(gridSize) {
   const size = (canvas.width / gridSize);
   const gridArray = [...Array(gridSize).keys()];
 
@@ -73,7 +73,7 @@ function resetBoard(gridSize) {
 function drawGame(game) {
   resetBoard(game.gridSize);
 
-  const size = canvas.width / game.gridSize;
+  const size = (canvas.width / game.gridSize);
   const foodPos = game.foodPos;
 
   for (foodIndex in foodPos) {
@@ -108,7 +108,7 @@ function drawGame(game) {
   }
 }
 
-function drawSnake(snake, size) {
+async function drawSnake(snake, size) {
   snake.segments.forEach((segment, _) => {
     context.fillStyle = snake.snakeColour;
     context.fillRect(segment.x * size, segment.y * size, size, size);
@@ -193,64 +193,66 @@ function updateGamestate(currentState, newGamestate) {
     for (playerName in updatedState.players) {
       let player = updatedState.players[playerName]
       let segments = player.segments;
-      let headPos = player.headPos;
-      let newSegment
 
       // Checks if player is dead
       if (newGamestate.players[playerName]) {
         player.dead = newGamestate.players[playerName].dead
 
-        if (newGamestate.players[playerName].speedIncrease > 0 && newGamestate.players[userName].segments > 3) {
-          console.log("Speeeed")
+        let headPos = player.headPos;
+        let newSegment
+        let movementDirection = newGamestate.players[playerName].movementDirection
+        let gridSize = currentState.gridSize
+        let xDif = Math.abs(newGamestate.players[playerName].headPos.x - headPos.x)
+        let yDif = Math.abs(newGamestate.players[playerName].headPos.y - headPos.y)
+
+        // Uses difference in headpos to find out if player had speed increase
+        for (_ in [...Array(Math.max(xDif, yDif)).keys()]) {
           // If the player is waiting to have new segments added make a copy of the last segment before it moves and then add it afterwards
           if (segments.length < newGamestate.players[playerName].segments) {
             newSegment = {...segments[0]};
           }
 
           // Moves players
-          let xDif = newGamestate.players[playerName].headPos.x - player.headPos.x
-          let yDif = newGamestate.players[playerName].headPos.y - player.headPos.y
           for (segmentIndex in segments) {
             let segment = segments[parseInt(segmentIndex)];
             if (segmentIndex == segments.length - 1) {
-              if (xDif > 0) {
-                headPos.x += xDif / 2
-                segment.x += xDif / 2
+              headPos.x += movementDirection.x
+              headPos.y += movementDirection.y
+              
+              // Border checks
+              if (headPos.x >= gridSize) {
+                segment.x = 0
+              }
+              else if (headPos.x < 0) {
+                segment.x = gridSize - 1
+              }
+            
+              else if (headPos.y >= gridSize) {
+                segment.y = 0
+              }
+              else if (headPos.y < 0) {
+                segment.y = gridSize - 1
               } else {
-                headPos.y += yDif / 2
-                segment.y += yDif / 2
+                segment.x += movementDirection.x
+                segment.y += movementDirection.y
               }
             } else {
-              let nextSegment = segments[parseInt(segmentIndex) + 1];
+              nextSegment = segments[parseInt(segmentIndex) + 1];
               segment.x = nextSegment.x;
               segment.y = nextSegment.y;
             }
           }
-        }
-          // If the player is waiting to have new segments added make a copy of the last segment before it moves and then add it afterwards
-        if (segments.length < newGamestate.players[playerName].segments) {
-          newSegment = {...segments[0]};
-        }
 
-        // Moves players
-        for (segmentIndex in segments) {
-          let segment = segments[parseInt(segmentIndex)];
-          if (segmentIndex == segments.length - 1) {
-            headPos.x = newGamestate.players[playerName].headPos.x
-            headPos.y = newGamestate.players[playerName].headPos.y
-            segment.x = headPos.x
-            segment.y = headPos.y
-          } else {
-            let nextSegment = segments[parseInt(segmentIndex) + 1];
-            segment.x = nextSegment.x;
-            segment.y = nextSegment.y;
+          // Adds new segment
+          if (newSegment) {
+            player.segments.unshift(newSegment);
           }
         }
 
-        if (newSegment) {
-          player.segments.unshift(newSegment);
-        }
+        headPos.x = newGamestate.players[playerName].headPos.x
+        headPos.y = newGamestate.players[playerName].headPos.y
 
+        // Removes unnecessary segments
         segments.splice(0, (segments.length - newGamestate.players[playerName].segments))
       } else {
         segments = []

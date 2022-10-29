@@ -14,7 +14,7 @@ socket.on("new-gamestate", (gamestate) => {
 function updateLeaderboard() {
   // Clears leaderboard
   while (leaderboard.firstChild) {
-    leaderboard.removeChild(leaderboard.firstChild)
+    leaderboard.removeChild(leaderboard.lastChild)
   }
   let playerScores = []
   let orderedScores = []
