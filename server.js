@@ -175,7 +175,7 @@ io.on("connection", (socket) => {
   socket.on("speedIncrease", (gameType) => {
     if (gameType == "multiplayer") {
       userName = multiplayerPlayers[socket.id]
-      if (multiplayerGame.players[userName]) {
+      if (multiplayerGame.players[userName] && !multiplayerGame.players[userName].speedIncrease) {
         multiplayerGame.players[userName].speedIncrease += 5
       }
     } else {
@@ -238,6 +238,7 @@ function reduceGamestate(oldGamestate, newGamestate, sendSegments) {
     reducedGamestate.players[newPlayerName] = {
       headPos: newPlayer.headPos,
       segments: [],
+      speedIncrease: newPlayer.speedIncrease
     }
     if (sendSegments) {
       reducedGamestate.players[newPlayerName].segments = newPlayer.segments

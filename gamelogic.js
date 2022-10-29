@@ -72,6 +72,8 @@ function gameLoop(game) {
         player.speedIncrease--
 
         player = playerChecks(player, game) 
+      } else {
+        player.speedIncrease = 0
       }
     }
   }

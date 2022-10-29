@@ -200,7 +200,34 @@ function updateGamestate(currentState, newGamestate) {
       if (newGamestate.players[playerName]) {
         player.dead = newGamestate.players[playerName].dead
 
-        // If the player is waiting to have new segments added make a copy of the last segment before it moves and then add it afterwards
+        if (newGamestate.players[playerName].speedIncrease > 0 && newGamestate.players[userName].segments > 3) {
+          console.log("Speeeed")
+          // If the player is waiting to have new segments added make a copy of the last segment before it moves and then add it afterwards
+          if (segments.length < newGamestate.players[playerName].segments) {
+            newSegment = {...segments[0]};
+          }
+
+          // Moves players
+          let xDif = newGamestate.players[playerName].headPos.x - player.headPos.x
+          let yDif = newGamestate.players[playerName].headPos.y - player.headPos.y
+          for (segmentIndex in segments) {
+            let segment = segments[parseInt(segmentIndex)];
+            if (segmentIndex == segments.length - 1) {
+              if (xDif > 0) {
+                headPos.x += xDif / 2
+                segment.x += xDif / 2
+              } else {
+                headPos.y += yDif / 2
+                segment.y += yDif / 2
+              }
+            } else {
+              let nextSegment = segments[parseInt(segmentIndex) + 1];
+              segment.x = nextSegment.x;
+              segment.y = nextSegment.y;
+            }
+          }
+        }
+          // If the player is waiting to have new segments added make a copy of the last segment before it moves and then add it afterwards
         if (segments.length < newGamestate.players[playerName].segments) {
           newSegment = {...segments[0]};
         }
@@ -214,7 +241,7 @@ function updateGamestate(currentState, newGamestate) {
             segment.x = headPos.x
             segment.y = headPos.y
           } else {
-            nextSegment = segments[parseInt(segmentIndex) + 1];
+            let nextSegment = segments[parseInt(segmentIndex) + 1];
             segment.x = nextSegment.x;
             segment.y = nextSegment.y;
           }
@@ -224,7 +251,7 @@ function updateGamestate(currentState, newGamestate) {
           player.segments.unshift(newSegment);
         }
 
-        segments.splice(0, segments.length - newGamestate.players[playerName].segments)
+        segments.splice(0, (segments.length - newGamestate.players[playerName].segments))
       } else {
         segments = []
       }
