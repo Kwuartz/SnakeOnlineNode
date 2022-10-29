@@ -263,7 +263,7 @@ function gameInterval(room, gamestate) {
       reducedGamestate = reduceGamestate(oldGamestate, gamestate, false);
       lastFullState--
     } else {
-      reducedGamestate = reduceGamestate(oldGamestate, gamestate, true);
+      reducedGamestate = reduceGamestate(oldGamestate, gamestate, false);
       lastFullState = gamestate.fps * 2
     }
     io.to(room).emit("new-gamestate", reducedGamestate);

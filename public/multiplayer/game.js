@@ -87,10 +87,8 @@ function drawGame(game) {
 
   for (username in game.players) {
     let snake = game.players[username]
-    context.textAlign = "center"
+    
     drawSnake(game.players[username], size);
-    context.fillStyle = "white";
-    context.fillText(username, (snake.headPos.x + 0.5) * size, snake.headPos.y * size);
     if (username == userName) {
       context.textAlign = "left"
       context.fillText("Score: " + (snake.segments.length - 3), 0.9 * size, 1.5 * size)
@@ -109,19 +107,24 @@ function drawGame(game) {
 }
 
 async function drawSnake(snake, size) {
-  snake.segments.forEach((segment, _) => {
-    context.fillStyle = snake.snakeColour;
-    context.fillRect(segment.x * size, segment.y * size, size, size);
-    // Eyes
-    if (segment.x == snake.headPos.x && segment.y == snake.headPos. y) {
-      context.fillStyle = "white"
-      context.fillRect((segment.x + 0.05) * size, (segment.y + 0.5) * size, size/4, size/4)
-      context.fillRect((segment.x + 0.65) * size, (segment.y + 0.5) * size, size/4, size/4)
-      context.fillStyle = "black"
-      context.fillRect((segment.x + 0.2) * size, (segment.y + 0.5) * size, size/8, size/8)
-      context.fillRect((segment.x + 0.8) * size, (segment.y + 0.5) * size, size/8, size/8)
-    }
-  });
+  if (!snake.dead) {
+    snake.segments.forEach((segment, _) => {
+      context.fillStyle = snake.snakeColour;
+      context.fillRect(segment.x * size, segment.y * size, size, size);
+      // Eyes
+      if (segment.x == snake.headPos.x && segment.y == snake.headPos. y) {
+        context.fillStyle = "white"
+        context.fillRect((segment.x + 0.05) * size, (segment.y + 0.5) * size, size/4, size/4)
+        context.fillRect((segment.x + 0.65) * size, (segment.y + 0.5) * size, size/4, size/4)
+        context.fillStyle = "black"
+        context.fillRect((segment.x + 0.2) * size, (segment.y + 0.5) * size, size/8, size/8)
+        context.fillRect((segment.x + 0.8) * size, (segment.y + 0.5) * size, size/8, size/8)
+      }
+    });
+    context.textAlign = "center"
+    context.fillStyle = "white";
+    context.fillText(username, (snake.headPos.x + 0.5) * size, snake.headPos.y * size);
+  }
 }
 
 function getKeys(key) {
@@ -205,6 +208,12 @@ function updateGamestate(currentState, newGamestate) {
         let xDif = Math.abs(newGamestate.players[playerName].headPos.x - headPos.x)
         let yDif = Math.abs(newGamestate.players[playerName].headPos.y - headPos.y)
 
+        // This stops the program from moving the player multiple times because they travelled through a wall and it checks if they had their speed increased while moving through that wall
+        if (Math.max(xDif, yDif) > 2) {
+          console.log(gridSize - Math.max(xDif, yDif))
+          xDif = yDif = gridSize - Math.max(xDif, yDif)
+        } 
+
         // Uses difference in headpos to find out if player had speed increase
         for (_ in [...Array(Math.max(xDif, yDif)).keys()]) {
           // If the player is waiting to have new segments added make a copy of the last segment before it moves and then add it afterwards
@@ -213,8 +222,7 @@ function updateGamestate(currentState, newGamestate) {
           }
 
           // Moves players
-          for (segmentIndex in segments) {
-            let segment = segments[parseInt(segmentIndex)];
+          segments.forEach((segment, segmentIndex) => {
             if (segmentIndex == segments.length - 1) {
               headPos.x += movementDirection.x
               headPos.y += movementDirection.y
@@ -226,7 +234,6 @@ function updateGamestate(currentState, newGamestate) {
               else if (headPos.x < 0) {
                 segment.x = gridSize - 1
               }
-            
               else if (headPos.y >= gridSize) {
                 segment.y = 0
               }
@@ -236,13 +243,18 @@ function updateGamestate(currentState, newGamestate) {
                 segment.x += movementDirection.x
                 segment.y += movementDirection.y
               }
+
+              // This checks if the player sped through the wall and went two blocks outside of the grid and if they did it moves them an extra time to compensate for that.
+              if (headPos.x > gridSize || headPos.y > gridSize || headPos.x < -1 || headPos.y < -1) {
+                segment.x += movementDirection.x
+                segment.y += movementDirection.y
+              }
             } else {
               nextSegment = segments[parseInt(segmentIndex) + 1];
               segment.x = nextSegment.x;
               segment.y = nextSegment.y;
             }
-          }
-
+          })
           // Adds new segment
           if (newSegment) {
             player.segments.unshift(newSegment);
@@ -254,10 +266,9 @@ function updateGamestate(currentState, newGamestate) {
 
         // Removes unnecessary segments
         segments.splice(0, (segments.length - newGamestate.players[playerName].segments))
-      } else {
-        segments = []
       }
     }
+    //console.log(JSON.parse(JSON.stringify(updatedState.players["a"].segments)))
     return updatedState
   }
 }
