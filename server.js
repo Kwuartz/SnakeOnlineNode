@@ -79,7 +79,7 @@ io.on("connection", (socket) => {
       let initialGamestate = {...multiplayerGame}
       delete initialGamestate.interval
       delete initialGamestate.colours
-      socket.emit("new-gamestate", initialGamestate)
+      io.to(multiplayerRoom).emit("new-gamestate", initialGamestate)
     }
   });
 
@@ -97,12 +97,17 @@ io.on("connection", (socket) => {
     socket.emit("new-gamestate", initialGamestate)
   })
 
-  socket.on("player-respawn", (userName, gameType) => {
+  socket.on("player-respawn", (gameType) => {
     if (gameType == "multiplayer") {
       userName = multiplayerPlayers[socket.id];
       console.log(userName + " has respawned!");
       if (multiplayerGame) {
         multiplayerGame.players[userName] = createNewPlayer(multiplayerGame);
+
+        let initialGamestate = {...multiplayerGame}
+        delete initialGamestate.interval
+        delete initialGamestate.colours
+        io.to(multiplayerRoom).emit("new-gamestate", initialGamestate)
       }
     } else if (gameType == "singleplayer") {
       singlePlayerGames[socket.id].players["player"] = createNewPlayer(singlePlayerGames[socket.id]);
@@ -234,20 +239,15 @@ function reduceGamestate(oldGamestate, newGamestate, sendSegments) {
     newPlayer = newGamestate.players[newPlayerName]
     reducedGamestate.players[newPlayerName] = {
       headPos: newPlayer.headPos,
-      segments: []
+      segments: [],
     }
     if (sendSegments) {
       reducedGamestate.players[newPlayerName].segments = newPlayer.segments
     } else {
       reducedGamestate.players[newPlayerName].segments = newPlayer.segments.length
     }
-    if (newPlayer.speedIncrease) {
-      reducedGamestate.players[newPlayerName].speedIncrease = true
-    }
     if (newPlayer.dead) {
       reducedGamestate.players[newPlayerName].dead = true
-    } else {
-      reducedGamestate.players[newPlayerName].dead = false
     }
   }
   return reducedGamestate
@@ -265,7 +265,7 @@ function gameInterval(room, gamestate) {
       lastFullState--
     } else {
       reducedGamestate = reduceGamestate(oldGamestate, gamestate, true);
-      lastFullState = 3
+      lastFullState = gamestate.fps * 2
     }
     io.to(room).emit("new-gamestate", reducedGamestate);
 

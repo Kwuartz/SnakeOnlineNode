@@ -167,6 +167,7 @@ window.addEventListener("keydown", (event) => {
 
 
 function updateGamestate(currentState, newGamestate) {
+  if (!newGamestate.players[userName]) {return currentState}
   // Updating game settings like party mode
   let updatedState = {...currentState, ...newGamestate}
   // Updating foodPos
@@ -194,29 +195,38 @@ function updateGamestate(currentState, newGamestate) {
       let segments = player.segments;
       let headPos = player.headPos;
       let newSegment
-    
-      // If the player is waiting to have new segments added make a copy of the last segment before it moves and then add it afterwards
-      if (player.segments.length < newGamestate.players[playerName].segments) {
-        newSegment = {...segments[0]};
-      }
-    
-      // Moves players
-      for (segmentIndex in segments) {
-        let segment = segments[parseInt(segmentIndex)];
-        if (segmentIndex == segments.length - 1) {
-          headPos.x = newGamestate.players[playerName].headPos.x
-          headPos.y = newGamestate.players[playerName].headPos.y
-          segment.x = headPos.x
-          segment.y = headPos.y
-        } else {
-          nextSegment = segments[parseInt(segmentIndex) + 1];
-          segment.x = nextSegment.x;
-          segment.y = nextSegment.y;
-        }
-      }
 
-      if (newSegment) {
-        player.segments.unshift(newSegment);
+      // Checks if player is dead
+      if (newGamestate.players[playerName]) {
+        player.dead = newGamestate.players[playerName].dead
+
+        // If the player is waiting to have new segments added make a copy of the last segment before it moves and then add it afterwards
+        if (segments.length < newGamestate.players[playerName].segments) {
+          newSegment = {...segments[0]};
+        }
+
+        // Moves players
+        for (segmentIndex in segments) {
+          let segment = segments[parseInt(segmentIndex)];
+          if (segmentIndex == segments.length - 1) {
+            headPos.x = newGamestate.players[playerName].headPos.x
+            headPos.y = newGamestate.players[playerName].headPos.y
+            segment.x = headPos.x
+            segment.y = headPos.y
+          } else {
+            nextSegment = segments[parseInt(segmentIndex) + 1];
+            segment.x = nextSegment.x;
+            segment.y = nextSegment.y;
+          }
+        }
+
+        if (newSegment) {
+          player.segments.unshift(newSegment);
+        }
+
+        segments.splice(0, segments.length - newGamestate.players[playerName].segments)
+      } else {
+        segments = []
       }
     }
     return updatedState
@@ -229,12 +239,13 @@ socket.on("new-gamestate", (newGamestate) => {
   }
 
   if (canvas && localGame.players[userName]) {
-    if (localGame.players[userName].dead == false) {
+    if (!localGame.players[userName].dead) {
       window.requestAnimationFrame(() => {drawGame(localGame)})
     } else {
       death.play()
       socket.emit("player-death", "multiplayer")
       socket.emit("server-message", userName + " has died!");
+      localGame.players[userName].dead = false
     }
 
     inputDelay = 800 / localGame.fps

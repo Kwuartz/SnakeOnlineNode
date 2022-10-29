@@ -71,7 +71,8 @@ socket.on("player-died", () => {
     willClose: () => {
       clearInterval(timerInterval)
     }
-  }).then((result) => {
-    socket.emit("player-respawn", userName, "multiplayer")
+  }).then(() => {
+    console.log
+    socket.emit("player-respawn", "multiplayer")
   })
 })
