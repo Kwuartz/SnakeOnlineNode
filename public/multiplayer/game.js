@@ -191,6 +191,11 @@ function updateGamestate(currentState, newGamestate) {
     }
     return updatedState
   } else {
+    for (playerName in currentState.players) {
+      if (!Object.keys(newGamestate.players).includes(playerName)) {
+        delete currentState.players[playerName]
+      }
+    }
     updatedState.players = currentState.players
 
     for (playerName in updatedState.players) {
