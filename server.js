@@ -212,9 +212,7 @@ io.on("connection", (socket) => {
 function reduceGamestate(oldGamestate, newGamestate, sendSegments) {
   // Checking game settings
   let reducedGamestate = {}
-  if (newGamestate.party != oldGamestate.party) {
-    reducedGamestate.party = newGamestate.party
-  }
+  reducedGamestate.party = newGamestate.party
 
   // Checking food pos
   newGamestate.foodPos.forEach((newFoodPos) => {
@@ -278,11 +276,19 @@ function gameInterval(room, gamestate) {
 
 // Double speed when on party mode
 function partyInterval(room, gamestate) {
+  let lastFullState = 0
   gamestate.interval = setInterval(() => {
+    let oldGamestate = JSON.parse(JSON.stringify(gamestate))
+    let reducedGamestate
     gamestate = gameLoop(gamestate);
-    refinedGamestate = {...gamestate}
-    delete refinedGamestate.colours
-    io.to(room).emit("new-gamestate", refinedGamestate);
+    if (lastFullState) {
+      reducedGamestate = reduceGamestate(oldGamestate, gamestate, false);
+      lastFullState--
+    } else {
+      reducedGamestate = reduceGamestate(oldGamestate, gamestate, true);
+      lastFullState = gamestate.fps * 2
+    }
+    io.to(room).emit("new-gamestate", reducedGamestate);
     if (gamestate.party == false) {
       clearInterval(gamestate.interval)
       gameInterval(room, gamestate)
