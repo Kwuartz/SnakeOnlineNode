@@ -48,8 +48,11 @@ function gameLoop(game) {
   let players = game.players;
 
   // Random chance to spawn powerup
-  if (Math.round(Math.random() * POWERUPCHANCE) == 50) {
-    spawnPowerup();
+  if ((Math.random() * POWERUPCHANCE) < 5) {
+    let powerUp = generatePowerup(game)
+    if (powerUp) {
+      game.powerupPos.push(powerUp)
+    }
   }
 
   // Moves the players snakes and adds new segments
@@ -67,16 +70,12 @@ function gameLoop(game) {
   // Speed increase
   for (playerName in players) {
     let player = players[playerName];
-    let segments = player.segments;
     if (player.speedIncrease) {
-      if (player.segments.length > 3 && player.speedIncrease) {
-        segments.shift();
+      if (player.speedIncrease) {
         player = movePlayer(player);
         player.speedIncrease--;
 
         player = playerChecks(player, game);
-      } else {
-        player.speedIncrease = 0;
       }
     }
   }
@@ -107,31 +106,33 @@ function addSegment(player, segment) {
   return player;
 }
 
-function generateFood(foodPos, players) {
+function generateFood(game) {
   let newFoodPos = {
     x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
     y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
   };
 
+  let items = [...game.powerupPos, ...game.foodPos]
+  let players = game.players
+
   let empty = false;
   while (!empty) {
     empty = true;
-    foodPos.forEach((food) => {
+    items.forEach((item) => {
       if (empty) {
         [...Array(8).keys()].forEach((x) => {
           [...Array(8).keys()].forEach((y) => {
             if (
-              (food.x + x == newFoodPos.x && food.y + y == newFoodPos.y) ||
-              (food.x + x == newFoodPos.x && food.y - y == newFoodPos.y) ||
-              (food.x - x == newFoodPos.x && food.y + y == newFoodPos.y) ||
-              (food.x - x == newFoodPos.x && food.y - y == newFoodPos.y)
+              (item.x + x == newFoodPos.x && item.y + y == newFoodPos.y) ||
+              (item.x + x == newFoodPos.x && item.y - y == newFoodPos.y) ||
+              (item.x - x == newFoodPos.x && item.y + y == newFoodPos.y) ||
+              (item.x - x == newFoodPos.x && item.y - y == newFoodPos.y)
             ) {
               empty = false;
               newFoodPos = {
                 x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
                 y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
               };
-              console.log("Food space taken");
             }
           });
         });
@@ -157,7 +158,6 @@ function generateFood(foodPos, players) {
                   x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
                   y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
                 };
-                console.log("Food space taken by player");
               }
             });
           });
@@ -175,6 +175,7 @@ function playerChecks(player, game) {
   let headPos = player.headPos;
   let players = game.players;
   let foodPos = game.foodPos;
+  let powerupPos = game.powerupPos;
   segments.forEach((segment, segmentIndex) => {
     let isHead = segmentIndex == segments.length - 1;
     if (isHead == false && segment.x == headPos.x && segment.y == headPos.y) {
@@ -222,7 +223,15 @@ function playerChecks(player, game) {
   foodPos.forEach((food) => {
     if (headPos.x == food.x && headPos.y == food.y) {
       player.newSegments += 5;
-      foodPos[foodPos.indexOf(food)] = generateFood(foodPos, players);
+      foodPos[foodPos.indexOf(food)] = generateFood(game);
+    }
+  });
+
+  // Check if player is on power
+  powerupPos.forEach((powerup) => {
+    if (headPos.x == powerup.x && headPos.y == powerup.y) {
+      player.speedIncrease += 30;
+      powerupPos.splice(powerupPos.indexOf(powerup), 1)
     }
   });
 
@@ -293,7 +302,6 @@ function getSpawn(player, players) {
                 y: Math.round(Math.random() * (GRIDSIZE - 20)) + 5,
               };
               timesRun++;
-              console.log("Player space taken");
             }
           });
         });
@@ -306,8 +314,42 @@ function getSpawn(player, players) {
   return player;
 }
 
-function spawnPowerup() {
-  console.log("Power up spawned");
+function generatePowerup(game) {
+  let items = [...game.powerupPos, ...game.foodPos]
+
+  if (game.powerupPos.length < 2) {
+    let newPowerupPos = {
+      x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
+      y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
+    };
+
+    let empty = false;
+    while (!empty) {
+      empty = true;
+      items.forEach((item) => {
+        if (empty) {
+          [...Array(5).keys()].forEach((x) => {
+            [...Array(5).keys()].forEach((y) => {
+              if (
+                (item.x + x == newPowerupPos.x && item.y + y == newPowerupPos.y) ||
+                (item.x + x == newPowerupPos.x && item.y - y == newPowerupPos.y) ||
+                (item.x - x == newPowerupPos.x && item.y + y == newPowerupPos.y) ||
+                (item.x - x == newPowerupPos.x && item.y - y == newPowerupPos.y)
+              ) {
+                empty = false;
+                newPowerupPos = {
+                  x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
+                  y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
+                };
+              }
+            });
+          });
+        }
+      });
+    }
+    return newPowerupPos
+  }
+  return
 }
 
 function getColour(colours) {

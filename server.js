@@ -187,33 +187,17 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Speeds up player when they press space
-  socket.on("speedIncrease", (gameType) => {
-    if (gameType == "multiplayer") {
-      userName = multiplayerPlayers[socket.id];
-      if (
-        multiplayerGame.players[userName] &&
-        !multiplayerGame.players[userName].speedIncrease
-      ) {
-        multiplayerGame.players[userName].speedIncrease += 6;
-      }
-    } else {
-      singlePlayerGames[socket.id].players["player"].speedIncrease += 6;
-    }
-  });
-
   socket.on("chat-message", (message) => {
     username = multiplayerPlayers[socket.id];
 
     if (message == "party") {
       if (multiplayerGame.party) {
         multiplayerGame.party = false;
+        io.to(multiplayerRoom).emit("party", false)
       } else {
         multiplayerGame.party = true;
-        console.log("PARTY");
+        io.to(multiplayerRoom).emit("party", true)
       }
-    } else if (message == "stop party") {
-      multiplayerGame.party = false;
     }
 
     io.emit(
@@ -232,7 +216,6 @@ io.on("connection", (socket) => {
 function reduceGamestate(oldGamestate, newGamestate, sendSegments) {
   // Checking game settings
   let reducedGamestate = {};
-  reducedGamestate.party = newGamestate.party;
 
   // Checking food pos
   newGamestate.foodPos.forEach((newFoodPos) => {
@@ -252,6 +235,37 @@ function reduceGamestate(oldGamestate, newGamestate, sendSegments) {
     }
   });
 
+  // Checking power up pos
+  newGamestate.powerupPos.forEach((newPowerupPos) => {
+    let isNew = true;
+    oldGamestate.powerupPos.forEach((oldPowerupPos) => {
+      if (newPowerupPos.x === oldPowerupPos.x && newPowerupPos.y === oldPowerupPos.y) {
+        isNew = false;
+      }
+    });
+
+    if (isNew) {
+      if (!reducedGamestate.powerupPos) {
+        reducedGamestate.powerupPos = [];
+      }
+      reducedGamestate.powerupPos[newGamestate.powerupPos.indexOf(newPowerupPos)] =
+      newPowerupPos;
+    }
+  });
+
+  // Checks if any power ups were consumed
+  oldGamestate.powerupPos.forEach((oldPowerupPos, oldPowerupIndex) => {
+    if (newGamestate.powerupPos.every((newPowerupPos) => {
+      return newPowerupPos.x != oldPowerupPos.x || newPowerupPos.y != oldPowerupPos.y
+    })) {
+      if (!reducedGamestate.powerupPos) {
+        reducedGamestate.powerupPos = [];
+      }
+      console.log("Eaten")
+      reducedGamestate.powerupPos[oldPowerupIndex] = "used"
+    }
+  });
+
   // Checking players
   reducedGamestate.players = {};
   for (newPlayerName in newGamestate.players) {
@@ -267,9 +281,8 @@ function reduceGamestate(oldGamestate, newGamestate, sendSegments) {
       reducedGamestate.players[newPlayerName].segments =
         newPlayer.segments.length;
     }
-    if (newPlayer.dead) {
-      reducedGamestate.players[newPlayerName].dead = true;
-    }
+    if (newPlayer.dead) {reducedGamestate.players[newPlayerName].dead = true;}
+    if (newPlayer.newSegments - 5 == oldGamestate.players[newPlayerName].newSegments) {reducedGamestate.players[newPlayerName].foodEaten = true}
   }
   return reducedGamestate;
 }
@@ -288,6 +301,7 @@ function gameInterval(room, gamestate) {
       reducedGamestate = reduceGamestate(oldGamestate, gamestate, true);
       lastFullState = gamestate.fps * 10;
     }
+
     io.to(room).emit("new-gamestate", reducedGamestate);
 
     if (gamestate.party == true) {
@@ -311,6 +325,7 @@ function partyInterval(room, gamestate) {
       reducedGamestate = reduceGamestate(oldGamestate, gamestate, false);
       lastFullState = gamestate.fps * 10;
     }
+
     io.to(room).emit("new-gamestate", reducedGamestate);
     if (gamestate.party == false) {
       clearInterval(gamestate.interval);

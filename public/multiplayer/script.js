@@ -44,6 +44,10 @@ socket.on("username-taken", () => {
       const username = Swal.getPopup().querySelector('#username').value
       if (!username) {
         Swal.showValidationMessage("Your username cannot be blank!")
+      } else if (username.length > 30) {
+        Swal.showValidationMessage("Your username is too long!")
+      } else if (!/^[A-Za-z0-9_ ]*$/.test(username)) {
+        Swal.showValidationMessage("You cannot inclue  special characters in your username!")
       }
       return {username:username};
     }
@@ -76,3 +80,5 @@ socket.on("player-died", () => {
     socket.emit("player-respawn", "multiplayer")
   })
 })
+
+regex = /^[A-Z a-z0-9_ ]/

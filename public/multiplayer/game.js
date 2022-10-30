@@ -2,8 +2,8 @@ const gameBoard = document.getElementById("game");
 
 const foodColour = "red";
 const foodLeafColour = "green";
-const foodImage = new Image();
-foodImage.src = "../assets/images/apple.png";
+
+const speedPowerColour = "blue";
 
 let bg = "#79cf44";
 
@@ -77,9 +77,14 @@ function drawGame(game) {
 
   const size = canvas.width / game.gridSize;
   const foodPos = game.foodPos;
+  const powerupPos = game.powerupPos;
 
-  for (foodIndex in foodPos) {
-    food = game.foodPos[foodIndex];
+  powerupPos.forEach((powerUp) => {
+    context.fillStyle = speedPowerColour;
+    context.fillRect(powerUp.x * size, powerUp.y * size, size, size);
+  })
+
+  foodPos.forEach((food) => {
     context.fillStyle = foodColour;
     context.fillRect(food.x * size, food.y * size, size, size);
     context.fillStyle = foodLeafColour;
@@ -89,8 +94,7 @@ function drawGame(game) {
       size / 5,
       size / 3
     );
-    // context.drawImage(foodImage, food.x * size, food.y * size, size, size)
-  }
+  })
 
   for (username in game.players) {
     let snake = game.players[username];
@@ -180,8 +184,6 @@ function getKeys(key) {
       return (movementDirection = { x: -1, y: 0 });
     case "a":
       return (movementDirection = { x: -1, y: 0 });
-    case " ":
-      return "speed";
     default:
       return false;
   }
@@ -193,11 +195,7 @@ window.addEventListener("keydown", (event) => {
     if (lastDirectionChange < Date.now() - inputDelay) {
       lastDirectionChange = Date.now();
       if (movementDirection) {
-        if (movementDirection == "speed") {
-          socket.emit("speedIncrease", "multiplayer");
-        } else {
-          socket.emit("change-direction", movementDirection, "multiplayer");
-        }
+        socket.emit("change-direction", movementDirection, "multiplayer");
       }
     }
   }
@@ -207,6 +205,11 @@ function updateGamestate(currentState, newGamestate) {
   if (!newGamestate.players[userName]) {
     return currentState;
   }
+  // Checking if local player has eaten
+  if (newGamestate.players[userName].foodEaten) {
+    eat.play()
+  }
+
   // Updating game settings like party mode
   let updatedState = { ...currentState, ...newGamestate };
   // Updating foodPos
@@ -220,16 +223,41 @@ function updateGamestate(currentState, newGamestate) {
     });
   }
 
+  if (newGamestate.powerupPos) {
+    updatedState.powerupPos = currentState.powerupPos;
+    newGamestate.powerupPos.forEach((powerupPos, powerupIndex) => {
+      // Some will have placeholder undefined values so I can indentify index of powerupPos to replace
+      if (powerupPos) {
+        console.log(powerupPos)
+        if (powerupPos == "used") {
+          updatedState.powerupPos.splice(powerupIndex, 1)
+        } else {
+          updatedState.powerupPos[powerupIndex] = powerupPos;
+        }
+      }
+    });
+
+    // Checks if power ups were eaten
+
+  }
+
   // Updating players whether the server has sent full player info or partial info
   if (typeof newGamestate.players[userName].segments == "object") {
     for (newPlayerName in newGamestate.players) {
       updatedState.players[newPlayerName] = {
         ...currentState.players[newPlayerName],
-        ...updatedState.players[newPlayerName],
+        ...newGamestate.players[newPlayerName],
       };
     }
     return updatedState;
   } else {
+    // Checks if needs to play eat sound 
+    if (newGamestate.players[userName]) {
+      if (newGamestate.players[userName].newSegments) {
+        eat.play()
+      }
+    }
+
     // Deletes players if they disconnect
     for (playerName in currentState.players) {
       if (!Object.keys(newGamestate.players).includes(playerName)) {
@@ -248,19 +276,13 @@ function updateGamestate(currentState, newGamestate) {
 
         let headPos = player.headPos;
         let newSegment;
-        let movementDirection =
-          newGamestate.players[playerName].movementDirection;
+        let movementDirection =newGamestate.players[playerName].movementDirection;
         let gridSize = currentState.gridSize;
-        let xDif = Math.abs(
-          newGamestate.players[playerName].headPos.x - headPos.x
-        );
-        let yDif = Math.abs(
-          newGamestate.players[playerName].headPos.y - headPos.y
-        );
+        let xDif = Math.abs(newGamestate.players[playerName].headPos.x - headPos.x);
+        let yDif = Math.abs(newGamestate.players[playerName].headPos.y - headPos.y);
 
         // This stops the program from moving the player multiple times because they travelled through a wall and it checks if they had their speed increased while moving through that wall
         if (Math.max(xDif, yDif) > 2) {
-          console.log(gridSize - Math.max(xDif, yDif));
           xDif = yDif = gridSize - Math.max(xDif, yDif);
         }
 
@@ -323,10 +345,13 @@ function updateGamestate(currentState, newGamestate) {
         );
       }
     }
-    //console.log(JSON.parse(JSON.stringify(updatedState.players["a"].segments)))
     return updatedState;
   }
 }
+
+socket.on("party", (bool) => {
+  localGame.party = bool;
+})
 
 socket.on("new-gamestate", (newGamestate) => {
   if (!localGame) {
