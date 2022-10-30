@@ -230,7 +230,7 @@ function playerChecks(player, game) {
   // Check if player is on power
   powerupPos.forEach((powerup) => {
     if (headPos.x == powerup.x && headPos.y == powerup.y) {
-      player.speedIncrease += 30;
+      player.speedIncrease += 20;
       powerupPos.splice(powerupPos.indexOf(powerup), 1)
     }
   });

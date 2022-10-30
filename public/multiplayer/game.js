@@ -3,6 +3,7 @@ const gameBoard = document.getElementById("game");
 const foodColour = "red";
 const foodLeafColour = "green";
 
+
 const speedPowerColour = "blue";
 
 let bg = "#79cf44";
