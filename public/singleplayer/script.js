@@ -1,26 +1,26 @@
 const socket = io();
 const gameBoard = document.getElementById("game");
 const foodColour = "red";
-let bg = "#008ab8"
+let bg = "#008ab8";
 
 let context, canvas, game;
 
 let lastDirectionChange = 0;
-let inputDelay
+let inputDelay;
 
 let lastBgChange = 0;
-let bgDelay = 700
+let bgDelay = 700;
 
-let eat = new Audio("../assets/sounds/eat.mp3")
-let death = new Audio("../assets/sounds/death.mp3")
+let eat = new Audio("../assets/sounds/eat.mp3");
+let death = new Audio("../assets/sounds/death.mp3");
 
 let userName = "player";
 
 socket.emit("new-singleplayer");
 
-function sleep(milliseconds){
-  return new Promise(resolve => {
-      setTimeout(resolve, milliseconds);
+function sleep(milliseconds) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
   });
 }
 
@@ -34,7 +34,7 @@ function init() {
   canvas = document.getElementById("canvas");
   context = canvas.getContext("2d");
   canvas.width = canvas.height = 800;
-  context.font = "0.9rem Arial"
+  context.font = "0.9rem Arial";
 }
 
 function drawGame(game) {
@@ -49,11 +49,15 @@ function drawGame(game) {
     context.fillRect(food.x * size, food.y * size, size, size);
   }
 
-  let snake = game.players[userName]
+  let snake = game.players[userName];
   drawSnake(game.players[userName], size);
-  context.fillStyle = "white"
-  context.textAlign = "left"
-  context.fillText("Score: " + (snake.segments.length - 3), 0.9 * size, 1.5 * size)
+  context.fillStyle = "white";
+  context.textAlign = "left";
+  context.fillText(
+    "Score: " + (snake.segments.length - 3),
+    0.9 * size,
+    1.5 * size
+  );
 }
 
 function drawSnake(snake, size) {
@@ -61,13 +65,33 @@ function drawSnake(snake, size) {
     context.fillStyle = snake.snakeColour;
     context.fillRect(segment.x * size, segment.y * size, size, size);
     // Eyes
-    if (segment.x == snake.headPos.x && segment.y == snake.headPos. y) {
-      context.fillStyle = "white"
-      context.fillRect((segment.x + 0.05) * size, (segment.y + 0.5) * size, size/4, size/4)
-      context.fillRect((segment.x + 0.65) * size, (segment.y + 0.5) * size, size/4, size/4)
-      context.fillStyle = "black"
-      context.fillRect((segment.x + 0.2) * size, (segment.y + 0.5) * size, size/8, size/8)
-      context.fillRect((segment.x + 0.8) * size, (segment.y + 0.5) * size, size/8, size/8)
+    if (segment.x == snake.headPos.x && segment.y == snake.headPos.y) {
+      context.fillStyle = "white";
+      context.fillRect(
+        (segment.x + 0.05) * size,
+        (segment.y + 0.5) * size,
+        size / 4,
+        size / 4
+      );
+      context.fillRect(
+        (segment.x + 0.65) * size,
+        (segment.y + 0.5) * size,
+        size / 4,
+        size / 4
+      );
+      context.fillStyle = "black";
+      context.fillRect(
+        (segment.x + 0.2) * size,
+        (segment.y + 0.5) * size,
+        size / 8,
+        size / 8
+      );
+      context.fillRect(
+        (segment.x + 0.8) * size,
+        (segment.y + 0.5) * size,
+        size / 8,
+        size / 8
+      );
     }
   });
 }
@@ -82,8 +106,8 @@ function getKeys(key) {
       return (movementDirection = { x: 1, y: 0 });
     case "arrowleft":
       return (movementDirection = { x: -1, y: 0 });
-    case (" "):
-      return "speed"
+    case " ":
+      return "speed";
     default:
       return false;
   }
@@ -96,7 +120,7 @@ window.addEventListener("keydown", (event) => {
       lastDirectionChange = Date.now();
       if (movementDirection) {
         if (movementDirection == "speed") {
-          socket.emit("speedIncrease", "singleplayer")
+          socket.emit("speedIncrease", "singleplayer");
         } else {
           socket.emit("change-direction", movementDirection, "singleplayer");
         }
@@ -116,35 +140,35 @@ socket.on("new-gamestate", (gamestate) => {
     if (game.players[userName].dead == false) {
       requestAnimationFrame(() => drawGame(game));
     } else {
-      death.play()
-      socket.emit("player-death", "singleplayer")
+      death.play();
+      socket.emit("player-death", "singleplayer");
     }
     if (game.players[userName].newSegments == 7) {
-      eat.play()
+      eat.play();
     }
 
-    inputDelay = 500 / game.fps
+    inputDelay = 500 / game.fps;
   }
 });
 
 socket.on("player-died", () => {
   Swal.fire({
     titleText: "Respawning...",
-    html: 'You will respawn in <timer></timer> seconds.',
+    html: "You will respawn in <timer></timer> seconds.",
     timer: 3500,
     timerProgressBar: true,
     width: "25vw",
     didOpen: () => {
-      Swal.showLoading()
-      const respawnTimer = Swal.getHtmlContainer().querySelector('timer')
+      Swal.showLoading();
+      const respawnTimer = Swal.getHtmlContainer().querySelector("timer");
       timerInterval = setInterval(() => {
-        respawnTimer.textContent = Math.round(Swal.getTimerLeft()/1000)
-      }, 100)
+        respawnTimer.textContent = Math.round(Swal.getTimerLeft() / 1000);
+      }, 100);
     },
     willClose: () => {
-      clearInterval(timerInterval)
-    }
+      clearInterval(timerInterval);
+    },
   }).then((result) => {
-    socket.emit("player-respawn", "singleplayer")
-  })
-}) 
+    socket.emit("player-respawn", "singleplayer");
+  });
+});

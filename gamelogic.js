@@ -15,30 +15,33 @@ function createGameState() {
       return {
         x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
         y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
-      }
+      };
     }),
     powerupPos: [],
     gridSize: GRIDSIZE,
     fps: FPS,
     party: false,
-    colours: COLOURS
+    colours: COLOURS,
   };
 }
 
 function createNewPlayer(gamestate) {
-  let player = getSpawn({
-    headPos: {},
-    movementDirection: {
-      x: 1,
-      y: 0,
+  let player = getSpawn(
+    {
+      headPos: {},
+      movementDirection: {
+        x: 1,
+        y: 0,
+      },
+      segments: [],
+      dead: false,
+      newSegments: 2,
+      snakeColour: getColour(gamestate.colours),
+      speedIncrease: 0,
     },
-    segments: [],
-    dead: false,
-    newSegments: 2,
-    snakeColour: getColour(gamestate.colours),
-    speedIncrease: 0
-  }, gamestate.players)
-  return player
+    gamestate.players
+  );
+  return player;
 }
 
 function gameLoop(game) {
@@ -46,34 +49,34 @@ function gameLoop(game) {
 
   // Random chance to spawn powerup
   if (Math.round(Math.random() * POWERUPCHANCE) == 50) {
-    spawnPowerup()
+    spawnPowerup();
   }
 
   // Moves the players snakes and adds new segments
   for (playerName in players) {
-    let player = players[playerName]
-    player = movePlayer(player)
+    let player = players[playerName];
+    player = movePlayer(player);
   }
 
   // Checks
   for (playerName in players) {
     let player = players[playerName];
-    player = playerChecks(player, game)
+    player = playerChecks(player, game);
   }
 
   // Speed increase
   for (playerName in players) {
     let player = players[playerName];
-    let segments = player.segments
+    let segments = player.segments;
     if (player.speedIncrease) {
       if (player.segments.length > 3 && player.speedIncrease) {
-        segments.shift()
-        player = movePlayer(player)
-        player.speedIncrease--
+        segments.shift();
+        player = movePlayer(player);
+        player.speedIncrease--;
 
-        player = playerChecks(player, game) 
+        player = playerChecks(player, game);
       } else {
-        player.speedIncrease = 0
+        player.speedIncrease = 0;
       }
     }
   }
@@ -81,7 +84,9 @@ function gameLoop(game) {
 }
 
 function changeDirection(direction, player) {
-  if (!player) {return}
+  if (!player) {
+    return;
+  }
   let currentDirection = player.movementDirection;
   if (
     currentDirection.x - 2 == direction.x ||
@@ -107,53 +112,56 @@ function generateFood(foodPos, players) {
     x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
     y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
   };
-  
-  let empty = false
+
+  let empty = false;
   while (!empty) {
-    empty = true
+    empty = true;
     foodPos.forEach((food) => {
       if (empty) {
         [...Array(8).keys()].forEach((x) => {
           [...Array(8).keys()].forEach((y) => {
             if (
-              food.x + x == newFoodPos.x && food.y + y == newFoodPos.y ||
-              food.x + x == newFoodPos.x && food.y - y == newFoodPos.y ||
-              food.x - x == newFoodPos.x && food.y + y == newFoodPos.y ||
-              food.x - x == newFoodPos.x && food.y - y == newFoodPos.y
-              ) {
-              empty = false
+              (food.x + x == newFoodPos.x && food.y + y == newFoodPos.y) ||
+              (food.x + x == newFoodPos.x && food.y - y == newFoodPos.y) ||
+              (food.x - x == newFoodPos.x && food.y + y == newFoodPos.y) ||
+              (food.x - x == newFoodPos.x && food.y - y == newFoodPos.y)
+            ) {
+              empty = false;
               newFoodPos = {
                 x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
                 y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
               };
-              console.log("Food space taken")
+              console.log("Food space taken");
             }
-          })
-        })
+          });
+        });
       }
-    })
-    
+    });
+
     if (empty) {
       for (playerName in players) {
         players[playerName].segments.forEach((segment) => {
           [...Array(4).keys()].forEach((x) => {
-            [...Array(4).keys()].forEach(y => {
+            [...Array(4).keys()].forEach((y) => {
               if (
-                segment.x + x == newFoodPos.x && segment.y + y == newFoodPos.y ||
-                segment.x + x == newFoodPos.x && segment.y - y == newFoodPos.y ||
-                segment.x - x == newFoodPos.x && segment.y + y == newFoodPos.y ||
-                segment.x - x == newFoodPos.x && segment.y - y == newFoodPos.y
-                ) {
-                empty = false
+                (segment.x + x == newFoodPos.x &&
+                  segment.y + y == newFoodPos.y) ||
+                (segment.x + x == newFoodPos.x &&
+                  segment.y - y == newFoodPos.y) ||
+                (segment.x - x == newFoodPos.x &&
+                  segment.y + y == newFoodPos.y) ||
+                (segment.x - x == newFoodPos.x && segment.y - y == newFoodPos.y)
+              ) {
+                empty = false;
                 newFoodPos = {
                   x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
                   y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
                 };
-                console.log("Food space taken by player")
+                console.log("Food space taken by player");
               }
-            })
-          })
-        })
+            });
+          });
+        });
       }
     }
   }
@@ -169,11 +177,7 @@ function playerChecks(player, game) {
   let foodPos = game.foodPos;
   segments.forEach((segment, segmentIndex) => {
     let isHead = segmentIndex == segments.length - 1;
-    if (
-      isHead == false &&
-      segment.x == headPos.x &&
-      segment.y == headPos.y
-    ) {
+    if (isHead == false && segment.x == headPos.x && segment.y == headPos.y) {
       player.dead = true;
     }
   });
@@ -203,17 +207,15 @@ function playerChecks(player, game) {
 
   // Checks if player hits into wall and sends them to other side
   if (headPos.x >= GRIDSIZE) {
-    headPos.x = 0
-  }
-  else if (headPos.x < 0) {
-    headPos.x = GRIDSIZE - 1
+    headPos.x = 0;
+  } else if (headPos.x < 0) {
+    headPos.x = GRIDSIZE - 1;
   }
 
   if (headPos.y >= GRIDSIZE) {
-    headPos.y = 0
-  }
-  else if (headPos.y < 0) {
-    headPos.y = GRIDSIZE - 1
+    headPos.y = 0;
+  } else if (headPos.y < 0) {
+    headPos.y = GRIDSIZE - 1;
   }
 
   // Check if player is on food
@@ -224,7 +226,7 @@ function playerChecks(player, game) {
     }
   });
 
-  return player
+  return player;
 }
 
 function movePlayer(player) {
@@ -232,13 +234,13 @@ function movePlayer(player) {
     let segments = player.segments;
     let headPos = player.headPos;
     let movementDirection = player.movementDirection;
-    let newSegment
-  
+    let newSegment;
+
     // If the player is waiting to have new segments added make a copy of the last segment before it moves and then add it afterwards
     if (player.newSegments) {
       newSegment = { ...segments[0] };
     }
-  
+
     // Moves players
     for (segmentIndex in segments) {
       let segment = segments[parseInt(segmentIndex)];
@@ -257,8 +259,8 @@ function movePlayer(player) {
     if (player.newSegments) {
       addSegment(player, newSegment);
     }
-  }   
-  return player
+  }
+  return player;
 }
 
 function getSpawn(player, players) {
@@ -269,14 +271,16 @@ function getSpawn(player, players) {
 
   // Checks if any other player in general area and makes sure that it only checks a certain number of times before giving up
   let empty = false;
-  let timesRun = 0
+  let timesRun = 0;
   while (!empty && timesRun < 10) {
     empty = true;
     for (otherPlayer in players) {
-      if (!empty) {break}
+      if (!empty) {
+        break;
+      }
       players[otherPlayer].segments.forEach((segment) => {
         [...Array(6).keys()].forEach((x) => {
-          [...Array(6).keys()].forEach(y => {
+          [...Array(6).keys()].forEach((y) => {
             if (
               (spawnPos.x + x == segment.x && spawnPos.y + y == segment.y) ||
               (spawnPos.x - x == segment.x && spawnPos.y + y == segment.y) ||
@@ -288,11 +292,11 @@ function getSpawn(player, players) {
                 x: Math.round(Math.random() * (GRIDSIZE - 20)) + 5,
                 y: Math.round(Math.random() * (GRIDSIZE - 20)) + 5,
               };
-              timesRun++
-              console.log("Player space taken")
+              timesRun++;
+              console.log("Player space taken");
             }
-          })
-        })
+          });
+        });
       });
     }
   }
@@ -303,11 +307,11 @@ function getSpawn(player, players) {
 }
 
 function spawnPowerup() {
-  console.log("Power up spawned")
+  console.log("Power up spawned");
 }
 
 function getColour(colours) {
   let colour = colours[Math.floor(Math.random() * colours.length)];
-  colours.splice(colours.indexOf(colour), 1)
+  colours.splice(colours.indexOf(colour), 1);
   return colour;
 }

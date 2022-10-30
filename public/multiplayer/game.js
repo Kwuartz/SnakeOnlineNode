@@ -27,8 +27,8 @@ let inputDelay;
 let lastBgChange = 0;
 let bgDelay = 700;
 
-let eat = new Audio("../assets/sounds/eat.mp3")
-let death = new Audio("../assets/sounds/death.mp3")
+let eat = new Audio("../assets/sounds/eat.mp3");
+let death = new Audio("../assets/sounds/death.mp3");
 
 let userName;
 
@@ -46,10 +46,12 @@ function init() {
 }
 
 async function resetBoard(gridSize) {
-  const size = (canvas.width / gridSize);
+  const size = canvas.width / gridSize;
   const gridArray = [...Array(gridSize).keys()];
 
-  if (!bg) {bg = "#79cf44"};
+  if (!bg) {
+    bg = "#79cf44";
+  }
   let darkBg = darkenColor(bg, -5);
 
   for (row in gridArray) {
@@ -58,7 +60,7 @@ async function resetBoard(gridSize) {
         context.fillStyle = bg;
         context.fillRect(row * size, collumn * size, size, size);
       } else {
-        context.fillStyle = darkBg
+        context.fillStyle = darkBg;
         if (collumn % 2 == 1 && row % 2 == 1) {
           context.fillStyle = bg;
         }
@@ -73,7 +75,7 @@ async function resetBoard(gridSize) {
 function drawGame(game) {
   resetBoard(game.gridSize);
 
-  const size = (canvas.width / game.gridSize);
+  const size = canvas.width / game.gridSize;
   const foodPos = game.foodPos;
 
   for (foodIndex in foodPos) {
@@ -81,29 +83,37 @@ function drawGame(game) {
     context.fillStyle = foodColour;
     context.fillRect(food.x * size, food.y * size, size, size);
     context.fillStyle = foodLeafColour;
-    context.fillRect((food.x + 0.4) * size, (food.y - 0.1) * size, size/5, size/3);
+    context.fillRect(
+      (food.x + 0.4) * size,
+      (food.y - 0.1) * size,
+      size / 5,
+      size / 3
+    );
     // context.drawImage(foodImage, food.x * size, food.y * size, size, size)
   }
 
   for (username in game.players) {
-    let snake = game.players[username]
-    
+    let snake = game.players[username];
+
     drawSnake(game.players[username], size);
     // Only draws score of local player
     if (username == userName) {
-      context.textAlign = "left"
-      context.fillText("Score: " + (snake.segments.length - 3), 0.9 * size, 1.5 * size)
+      context.textAlign = "left";
+      context.fillText(
+        "Score: " + (snake.segments.length - 3),
+        0.9 * size,
+        1.5 * size
+      );
     }
   }
 
   if (game.party) {
     if (lastBgChange < Date.now() - bgDelay) {
       lastBgChange = Date.now();
-      bg = partyColors[Math.round(Math.random() * partyColors.length - 1)]
+      bg = partyColors[Math.round(Math.random() * partyColors.length - 1)];
     }
-  }
-  else {
-    bg = "#79cf44"
+  } else {
+    bg = "#79cf44";
   }
 }
 
@@ -113,18 +123,42 @@ function drawSnake(snake, size) {
       context.fillStyle = snake.snakeColour;
       context.fillRect(segment.x * size, segment.y * size, size, size);
       // Eyes
-      if (segment.x == snake.headPos.x && segment.y == snake.headPos. y) {
-        context.fillStyle = "white"
-        context.fillRect((segment.x + 0.05) * size, (segment.y + 0.5) * size, size/4, size/4)
-        context.fillRect((segment.x + 0.65) * size, (segment.y + 0.5) * size, size/4, size/4)
-        context.fillStyle = "black"
-        context.fillRect((segment.x + 0.2) * size, (segment.y + 0.5) * size, size/8, size/8)
-        context.fillRect((segment.x + 0.8) * size, (segment.y + 0.5) * size, size/8, size/8)
+      if (segment.x == snake.headPos.x && segment.y == snake.headPos.y) {
+        context.fillStyle = "white";
+        context.fillRect(
+          (segment.x + 0.05) * size,
+          (segment.y + 0.5) * size,
+          size / 4,
+          size / 4
+        );
+        context.fillRect(
+          (segment.x + 0.65) * size,
+          (segment.y + 0.5) * size,
+          size / 4,
+          size / 4
+        );
+        context.fillStyle = "black";
+        context.fillRect(
+          (segment.x + 0.2) * size,
+          (segment.y + 0.5) * size,
+          size / 8,
+          size / 8
+        );
+        context.fillRect(
+          (segment.x + 0.8) * size,
+          (segment.y + 0.5) * size,
+          size / 8,
+          size / 8
+        );
       }
     });
-    context.textAlign = "center"
+    context.textAlign = "center";
     context.fillStyle = "white";
-    context.fillText(username, (snake.headPos.x + 0.5) * size, snake.headPos.y * size);
+    context.fillText(
+      username,
+      (snake.headPos.x + 0.5) * size,
+      snake.headPos.y * size
+    );
   }
 }
 
@@ -136,8 +170,8 @@ function getKeys(key) {
       return (movementDirection = { x: 0, y: -1 });
     case "arrowdown":
       return (movementDirection = { x: 0, y: 1 });
-      case "s":
-        return (movementDirection = { x: 0, y: 1 });
+    case "s":
+      return (movementDirection = { x: 0, y: 1 });
     case "arrowright":
       return (movementDirection = { x: 1, y: 0 });
     case "d":
@@ -146,8 +180,8 @@ function getKeys(key) {
       return (movementDirection = { x: -1, y: 0 });
     case "a":
       return (movementDirection = { x: -1, y: 0 });
-    case (" "):
-      return "speed"
+    case " ":
+      return "speed";
     default:
       return false;
   }
@@ -160,7 +194,7 @@ window.addEventListener("keydown", (event) => {
       lastDirectionChange = Date.now();
       if (movementDirection) {
         if (movementDirection == "speed") {
-          socket.emit("speedIncrease", "multiplayer")
+          socket.emit("speedIncrease", "multiplayer");
         } else {
           socket.emit("change-direction", movementDirection, "multiplayer");
         }
@@ -169,160 +203,177 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-
 function updateGamestate(currentState, newGamestate) {
-  if (!newGamestate.players[userName]) {return currentState}
+  if (!newGamestate.players[userName]) {
+    return currentState;
+  }
   // Updating game settings like party mode
-  let updatedState = {...currentState, ...newGamestate}
+  let updatedState = { ...currentState, ...newGamestate };
   // Updating foodPos
   if (newGamestate.foodPos) {
-    updatedState.foodPos = currentState.foodPos
+    updatedState.foodPos = currentState.foodPos;
     newGamestate.foodPos.forEach((foodPos, foodIndex) => {
       // Some will have placeholder undefined values so I can indentify index of foodPos to replace
       if (foodPos) {
-        updatedState.foodPos[foodIndex] = foodPos
+        updatedState.foodPos[foodIndex] = foodPos;
       }
-    })
+    });
   }
 
   // Updating players whether the server has sent full player info or partial info
-  if (typeof(newGamestate.players[userName].segments) == "object") {
+  if (typeof newGamestate.players[userName].segments == "object") {
     for (newPlayerName in newGamestate.players) {
-      updatedState.players[newPlayerName] = {...currentState.players[newPlayerName], ...updatedState.players[newPlayerName]}
+      updatedState.players[newPlayerName] = {
+        ...currentState.players[newPlayerName],
+        ...updatedState.players[newPlayerName],
+      };
     }
-    return updatedState
+    return updatedState;
   } else {
     // Deletes players if they disconnect
     for (playerName in currentState.players) {
       if (!Object.keys(newGamestate.players).includes(playerName)) {
-        delete currentState.players[playerName]
+        delete currentState.players[playerName];
       }
     }
-    updatedState.players = currentState.players
+    updatedState.players = currentState.players;
 
     for (playerName in updatedState.players) {
-      let player = updatedState.players[playerName]
+      let player = updatedState.players[playerName];
       let segments = player.segments;
 
       // Checks if player is dead
       if (newGamestate.players[playerName]) {
-        player.dead = newGamestate.players[playerName].dead
+        player.dead = newGamestate.players[playerName].dead;
 
         let headPos = player.headPos;
-        let newSegment
-        let movementDirection = newGamestate.players[playerName].movementDirection
-        let gridSize = currentState.gridSize
-        let xDif = Math.abs(newGamestate.players[playerName].headPos.x - headPos.x)
-        let yDif = Math.abs(newGamestate.players[playerName].headPos.y - headPos.y)
+        let newSegment;
+        let movementDirection =
+          newGamestate.players[playerName].movementDirection;
+        let gridSize = currentState.gridSize;
+        let xDif = Math.abs(
+          newGamestate.players[playerName].headPos.x - headPos.x
+        );
+        let yDif = Math.abs(
+          newGamestate.players[playerName].headPos.y - headPos.y
+        );
 
         // This stops the program from moving the player multiple times because they travelled through a wall and it checks if they had their speed increased while moving through that wall
         if (Math.max(xDif, yDif) > 2) {
-          console.log(gridSize - Math.max(xDif, yDif))
-          xDif = yDif = gridSize - Math.max(xDif, yDif)
-        } 
+          console.log(gridSize - Math.max(xDif, yDif));
+          xDif = yDif = gridSize - Math.max(xDif, yDif);
+        }
 
         // Uses difference in headpos to find out if player had speed increase
         for (_ in [...Array(Math.max(xDif, yDif)).keys()]) {
           // If the player is waiting to have new segments added make a copy of the last segment before it moves and then add it afterwards
           if (segments.length < newGamestate.players[playerName].segments) {
-            newSegment = {...segments[0]};
+            newSegment = { ...segments[0] };
           }
 
           // Moves players
           segments.forEach((segment, segmentIndex) => {
             if (segmentIndex == segments.length - 1) {
-              headPos.x += movementDirection.x
-              headPos.y += movementDirection.y
-              
+              headPos.x += movementDirection.x;
+              headPos.y += movementDirection.y;
+
               // Border checks
               if (headPos.x >= gridSize) {
-                segment.x = 0
-              }
-              else if (headPos.x < 0) {
-                segment.x = gridSize - 1
-              }
-              else if (headPos.y >= gridSize) {
-                segment.y = 0
-              }
-              else if (headPos.y < 0) {
-                segment.y = gridSize - 1
+                segment.x = 0;
+              } else if (headPos.x < 0) {
+                segment.x = gridSize - 1;
+              } else if (headPos.y >= gridSize) {
+                segment.y = 0;
+              } else if (headPos.y < 0) {
+                segment.y = gridSize - 1;
               } else {
-                segment.x += movementDirection.x
-                segment.y += movementDirection.y
+                segment.x += movementDirection.x;
+                segment.y += movementDirection.y;
               }
 
               // This checks if the player sped through the wall and went two blocks outside of the grid and if they did it moves them an extra time to compensate for that.
-              if (headPos.x > gridSize || headPos.y > gridSize || headPos.x < -1 || headPos.y < -1) {
-                segment.x += movementDirection.x
-                segment.y += movementDirection.y
+              if (
+                headPos.x > gridSize ||
+                headPos.y > gridSize ||
+                headPos.x < -1 ||
+                headPos.y < -1
+              ) {
+                segment.x += movementDirection.x;
+                segment.y += movementDirection.y;
               }
             } else {
               nextSegment = segments[parseInt(segmentIndex) + 1];
               segment.x = nextSegment.x;
               segment.y = nextSegment.y;
             }
-          })
+          });
           // Adds new segment
           if (newSegment) {
             player.segments.unshift(newSegment);
           }
         }
 
-        headPos.x = newGamestate.players[playerName].headPos.x
-        headPos.y = newGamestate.players[playerName].headPos.y
+        headPos.x = newGamestate.players[playerName].headPos.x;
+        headPos.y = newGamestate.players[playerName].headPos.y;
 
         // Removes unnecessary segments
-        segments.splice(0, (segments.length - newGamestate.players[playerName].segments))
+        segments.splice(
+          0,
+          segments.length - newGamestate.players[playerName].segments
+        );
       }
     }
     //console.log(JSON.parse(JSON.stringify(updatedState.players["a"].segments)))
-    return updatedState
+    return updatedState;
   }
 }
 
 socket.on("new-gamestate", (newGamestate) => {
-  if (!localGame) {localGame = {...newGamestate}} else {
-    localGame = updateGamestate(localGame, newGamestate)
+  if (!localGame) {
+    localGame = { ...newGamestate };
+  } else {
+    localGame = updateGamestate(localGame, newGamestate);
   }
 
   if (canvas && localGame.players[userName]) {
     if (!localGame.players[userName].dead) {
-      window.requestAnimationFrame(() => {drawGame(localGame)})
+      window.requestAnimationFrame(() => {
+        drawGame(localGame);
+      });
     } else {
-      death.play()
-      socket.emit("player-death", "multiplayer")
+      death.play();
+      socket.emit("player-death", "multiplayer");
       socket.emit("server-message", userName + " has died!");
-      localGame.players[userName].dead = false
+      localGame.players[userName].dead = false;
     }
 
-    inputDelay = 800 / localGame.fps
+    inputDelay = 800 / localGame.fps;
   }
 });
 
-// Not mine - from stack overflow 
+// Not mine - from stack overflow
 function darkenColor(color, percent) {
+  var R = parseInt(color.substring(1, 3), 16);
+  var G = parseInt(color.substring(3, 5), 16);
+  var B = parseInt(color.substring(5, 7), 16);
 
-  var R = parseInt(color.substring(1,3),16);
-  var G = parseInt(color.substring(3,5),16);
-  var B = parseInt(color.substring(5,7),16);
+  R = parseInt((R * (100 + percent)) / 100);
+  G = parseInt((G * (100 + percent)) / 100);
+  B = parseInt((B * (100 + percent)) / 100);
 
-  R = parseInt(R * (100 + percent) / 100);
-  G = parseInt(G * (100 + percent) / 100);
-  B = parseInt(B * (100 + percent) / 100);
+  R = R < 255 ? R : 255;
+  G = G < 255 ? G : 255;
+  B = B < 255 ? B : 255;
 
-  R = (R<255)?R:255;  
-  G = (G<255)?G:255;  
-  B = (B<255)?B:255;  
+  var RR = R.toString(16).length == 1 ? "0" + R.toString(16) : R.toString(16);
+  var GG = G.toString(16).length == 1 ? "0" + G.toString(16) : G.toString(16);
+  var BB = B.toString(16).length == 1 ? "0" + B.toString(16) : B.toString(16);
 
-  var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
-  var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
-  var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
-
-  return "#"+RR+GG+BB;
+  return "#" + RR + GG + BB;
 }
 
-function sleep(milliseconds){
-  return new Promise(resolve => {
-      setTimeout(resolve, milliseconds);
+function sleep(milliseconds) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
   });
 }
