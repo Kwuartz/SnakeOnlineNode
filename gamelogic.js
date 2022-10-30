@@ -102,21 +102,63 @@ function addSegment(player, segment) {
   return player;
 }
 
-function generateFood(foodPos, food) {
+function generateFood(foodPos, players) {
   let newFoodPos = {
     x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
     y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
   };
   
-  if (newFoodPos.x == food.x && newFoodPos.y == food.y) {
-    newFoodPos = {
-      x: Math.round(Math.random() * (GRIDSIZE - 1)),
-      y: Math.round(Math.random() * (GRIDSIZE - 1)) + 1,
-    };
+  let empty = false
+  while (!empty) {
+    empty = true
+    foodPos.forEach((food) => {
+      if (empty) {
+        [...Array(8).keys()].forEach((x) => {
+          [...Array(8).keys()].forEach((y) => {
+            if (
+              food.x + x == newFoodPos.x && food.y + y == newFoodPos.y ||
+              food.x + x == newFoodPos.x && food.y - y == newFoodPos.y ||
+              food.x - x == newFoodPos.x && food.y + y == newFoodPos.y ||
+              food.x - x == newFoodPos.x && food.y - y == newFoodPos.y
+              ) {
+              empty = false
+              newFoodPos = {
+                x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
+                y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
+              };
+              console.log("Food space taken")
+            }
+          })
+        })
+      }
+    })
+    
+    if (empty) {
+      for (playerName in players) {
+        players[playerName].segments.forEach((segment) => {
+          [...Array(4).keys()].forEach((x) => {
+            [...Array(4).keys()].forEach(y => {
+              if (
+                segment.x + x == newFoodPos.x && segment.y + y == newFoodPos.y ||
+                segment.x + x == newFoodPos.x && segment.y - y == newFoodPos.y ||
+                segment.x - x == newFoodPos.x && segment.y + y == newFoodPos.y ||
+                segment.x - x == newFoodPos.x && segment.y - y == newFoodPos.y
+                ) {
+                empty = false
+                newFoodPos = {
+                  x: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
+                  y: Math.round(Math.random() * (GRIDSIZE - 2)) + 1,
+                };
+                console.log("Food space taken by player")
+              }
+            })
+          })
+        })
+      }
+    }
   }
 
-  foodPos[foodPos.indexOf(food)] = newFoodPos;
-  return foodPos;
+  return newFoodPos;
 }
 
 function playerChecks(player, game) {
@@ -178,7 +220,7 @@ function playerChecks(player, game) {
   foodPos.forEach((food) => {
     if (headPos.x == food.x && headPos.y == food.y) {
       player.newSegments += 5;
-      foodPos = generateFood(foodPos, food);
+      foodPos[foodPos.indexOf(food)] = generateFood(foodPos, players);
     }
   });
 
@@ -231,17 +273,15 @@ function getSpawn(player, players) {
   while (!empty && timesRun < 10) {
     empty = true;
     for (otherPlayer in players) {
-      if (!empty) {break;}
+      if (!empty) {break}
       players[otherPlayer].segments.forEach((segment) => {
-        for (xPos in [...Array(6).keys()]) {
-          xPos = parseInt(xPos);
-          for (yPos in [...Array(6).keys()]) {
-            yPos = parseInt(yPos);
+        [...Array(6).keys()].forEach((x) => {
+          [...Array(6).keys()].forEach(y => {
             if (
-              (spawnPos.x + xPos == segment.x && spawnPos.y + yPos == segment.y) ||
-              (spawnPos.x - xPos == segment.x && spawnPos.y + yPos == segment.y) ||
-              (spawnPos.x - xPos == segment.x && spawnPos.y - yPos == segment.y) ||
-              (spawnPos.x + xPos == segment.x && spawnPos.y - yPos == segment.y)
+              (spawnPos.x + x == segment.x && spawnPos.y + y == segment.y) ||
+              (spawnPos.x - x == segment.x && spawnPos.y + y == segment.y) ||
+              (spawnPos.x - x == segment.x && spawnPos.y - y == segment.y) ||
+              (spawnPos.x + x == segment.x && spawnPos.y - y == segment.y)
             ) {
               empty = false;
               spawnPos = {
@@ -249,12 +289,14 @@ function getSpawn(player, players) {
                 y: Math.round(Math.random() * (GRIDSIZE - 20)) + 5,
               };
               timesRun++
+              console.log("Player space taken")
             }
-          }
-        }
+          })
+        })
       });
     }
   }
+
   player.headPos = spawnPos;
   player.segments.push(spawnPos);
   return player;

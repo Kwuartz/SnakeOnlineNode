@@ -89,6 +89,7 @@ function drawGame(game) {
     let snake = game.players[username]
     
     drawSnake(game.players[username], size);
+    // Only draws score of local player
     if (username == userName) {
       context.textAlign = "left"
       context.fillText("Score: " + (snake.segments.length - 3), 0.9 * size, 1.5 * size)
@@ -106,7 +107,7 @@ function drawGame(game) {
   }
 }
 
-async function drawSnake(snake, size) {
+function drawSnake(snake, size) {
   if (!snake.dead) {
     snake.segments.forEach((segment, _) => {
       context.fillStyle = snake.snakeColour;
@@ -191,6 +192,7 @@ function updateGamestate(currentState, newGamestate) {
     }
     return updatedState
   } else {
+    // Deletes players if they disconnect
     for (playerName in currentState.players) {
       if (!Object.keys(newGamestate.players).includes(playerName)) {
         delete currentState.players[playerName]
