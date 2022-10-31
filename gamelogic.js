@@ -176,6 +176,29 @@ function playerChecks(player, game) {
   let players = game.players;
   let foodPos = game.foodPos;
   let powerupPos = game.powerupPos;
+
+  
+  // Checks if player hits into wall and sends them to other side
+  if (headPos.x >= GRIDSIZE) {
+    headPos.x = 0;
+  } else if (headPos.x < 0) {
+    headPos.x = GRIDSIZE - 1;
+  }
+
+  if (headPos.y >= GRIDSIZE) {
+    headPos.y = 0;
+  } else if (headPos.y < 0) {
+    headPos.y = GRIDSIZE - 1;
+  }
+
+  // Check if player is on food
+  foodPos.forEach((food) => {
+    if (headPos.x == food.x && headPos.y == food.y) {
+      player.newSegments += 5;
+      foodPos[foodPos.indexOf(food)] = generateFood(game);
+    }
+  });
+
   segments.forEach((segment, segmentIndex) => {
     let isHead = segmentIndex == segments.length - 1;
     if (isHead == false && segment.x == headPos.x && segment.y == headPos.y) {
@@ -205,27 +228,6 @@ function playerChecks(player, game) {
       });
     }
   }
-
-  // Checks if player hits into wall and sends them to other side
-  if (headPos.x >= GRIDSIZE) {
-    headPos.x = 0;
-  } else if (headPos.x < 0) {
-    headPos.x = GRIDSIZE - 1;
-  }
-
-  if (headPos.y >= GRIDSIZE) {
-    headPos.y = 0;
-  } else if (headPos.y < 0) {
-    headPos.y = GRIDSIZE - 1;
-  }
-
-  // Check if player is on food
-  foodPos.forEach((food) => {
-    if (headPos.x == food.x && headPos.y == food.y) {
-      player.newSegments += 5;
-      foodPos[foodPos.indexOf(food)] = generateFood(game);
-    }
-  });
 
   // Check if player is on power
   powerupPos.forEach((powerup) => {
