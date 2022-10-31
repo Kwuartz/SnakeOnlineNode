@@ -12,9 +12,6 @@ socket.on("new-gamestate", (gamestate) => {
 
 function updateLeaderboard(players) {
   // Clears leaderboard
-  while (leaderboard.firstChild) {
-    leaderboard.removeChild(leaderboard.lastChild);
-  }
   let playerScores = [];
   let orderedScores = [];
 
@@ -38,10 +35,12 @@ function updateLeaderboard(players) {
     }
   }
 
-  // Createsl eaderboard with the scores
+  leaderboardElements = []
+  // Creates leaderboard with the scores
   for (player in orderedScores) {
-    let scoreElement = document.createElement("h5");
+    let scoreElement = document.createElement("div");
     scoreElement.innerText = player + ": " + orderedScores[player];
-    leaderboard.appendChild(scoreElement);
+    leaderboardElements.push(scoreElement);
   }
+  leaderboard.replaceChildren(...leaderboardElements)
 }
