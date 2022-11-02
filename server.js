@@ -131,31 +131,33 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("Player " + socket.id + " disconnected");
-    const room = multiplayerPlayers[socket.id].room
-    if (multiplayerGames[room]) {
-      const userName = multiplayerPlayers[socket.id].userName;
-      if (userName) {
-        if (multiplayerGames[room].players[userName]) {
-          multiplayerGames[room].colours.push(
-            multiplayerGames[room].players[userName].snakeColour
-          );
-          delete multiplayerGames[room].players[userName];
-        }
-        delete multiplayerPlayers[socket.id];
-        if (
-          deleteMultiTimeOut == false &&
-          Object.keys(multiplayerGames[room].players).length <= 0
-        ) {
-          deleteMultiTimeOut = true;
-          setTimeout(() => {
-            if (Object.keys(multiplayerGames[room].players).length <= 0) {
-              clearInterval(multiplayerGames[room].interval);
-              delete multiplayerGames[room];
-              console.log("Multiplayer game and interval instance terminated!");
-            } else {
-              deleteMultiTimeOut = false;
-            }
-          }, 10000);
+    if (multiplayerPlayers[socket.id]) {
+      const room = multiplayerPlayers[socket.id].room
+      if (multiplayerGames[room]) {
+        const userName = multiplayerPlayers[socket.id].userName;
+        if (userName) {
+          if (multiplayerGames[room].players[userName]) {
+            multiplayerGames[room].colours.push(
+              multiplayerGames[room].players[userName].snakeColour
+            );
+            delete multiplayerGames[room].players[userName];
+          }
+          delete multiplayerPlayers[socket.id];
+          if (
+            deleteMultiTimeOut == false &&
+            Object.keys(multiplayerGames[room].players).length <= 0
+          ) {
+            deleteMultiTimeOut = true;
+            setTimeout(() => {
+              if (Object.keys(multiplayerGames[room].players).length <= 0) {
+                clearInterval(multiplayerGames[room].interval);
+                delete multiplayerGames[room];
+                console.log("Multiplayer game and interval instance terminated!");
+              } else {
+                deleteMultiTimeOut = false;
+              }
+            }, 10000);
+          }
         }
       }
     }

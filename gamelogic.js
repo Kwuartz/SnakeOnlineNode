@@ -207,13 +207,11 @@ function playerChecks(player, game) {
   });
 
   // Check if player hit into another snake
-  let oponents = Object.keys(players);
-  for (oponentIndex in oponents) {
-    let oponentName = oponents[oponentIndex];
-    let isPlayer = oponentName == playerName;
-
-    oponentSegments = game.players[oponentName].segments;
-    if (isPlayer == false) {
+  for (oponentName in players) {
+    let oponent = players[oponentName]
+    let isPlayer = Object.is(oponent, player);
+    if (!isPlayer) {
+      let oponentSegments = oponent.segments;
       oponentSegments.forEach((oponentSegment, oponentSegmentIndex) => {
         if (oponentSegment) {
           let oponentSegment = oponentSegments[oponentSegmentIndex];
@@ -227,7 +225,7 @@ function playerChecks(player, game) {
         }
       });
     }
-  }
+  } 
 
   // Check if player is on power
   powerupPos.forEach((powerup) => {
