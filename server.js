@@ -63,7 +63,7 @@ io.on("connection", (socket) => {
     } else {
       let room
       if (Object.keys(multiplayerGames).length == 0) {
-        room = "multi1"
+        room = "multi0"
         multiplayerGames[room] = createGameState();
         gameInterval(room, multiplayerGames[room]);
         console.log(`New multiplayer game instance created: ${room}!`);
@@ -77,8 +77,7 @@ io.on("connection", (socket) => {
           }
         }
         if (!room) {
-          console.log(parseInt(Object.keys(multiplayerGames).length) + 1)
-          room = `multi${Object.keys(multiplayerGames).length + 1}`
+          room = `multi${Object.keys(multiplayerGames).length}`
           multiplayerGames[room] = createGameState();
           gameInterval(room, multiplayerGames[room]);
           console.log(`New multiplayer game instance created: ${room}!`);
@@ -156,7 +155,7 @@ io.on("connection", (socket) => {
               } else {
                 deleteMultiTimeOut = false;
               }
-            }, 10000);
+            }, 4000);
           }
         }
       }
