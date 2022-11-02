@@ -35,7 +35,6 @@ const {
 
 const multiplayerPlayers = {};
 let multiplayerGames = {}
-let deleteMultiTimeOut = false;
 
 app.set("trust proxy", true);
 
@@ -67,7 +66,6 @@ io.on("connection", (socket) => {
         multiplayerGames[room] = createGameState();
         gameInterval(room, multiplayerGames[room]);
         console.log(`New multiplayer game instance created: ${room}!`);
-        console.log("AAAAAA")
       } else {
         // Checking if games are full
         for (gameRoom in multiplayerGames) {
@@ -81,6 +79,7 @@ io.on("connection", (socket) => {
           multiplayerGames[room] = createGameState();
           gameInterval(room, multiplayerGames[room]);
           console.log(`New multiplayer game instance created: ${room}!`);
+          console.log(multiplayerGames[room].colours)
         }
       }
 
@@ -142,20 +141,10 @@ io.on("connection", (socket) => {
             delete multiplayerGames[room].players[userName];
           }
           delete multiplayerPlayers[socket.id];
-          if (
-            deleteMultiTimeOut == false &&
-            Object.keys(multiplayerGames[room].players).length <= 0
-          ) {
-            deleteMultiTimeOut = true;
-            setTimeout(() => {
-              if (Object.keys(multiplayerGames[room].players).length <= 0) {
-                clearInterval(multiplayerGames[room].interval);
-                delete multiplayerGames[room];
-                console.log("Multiplayer game and interval instance terminated!");
-              } else {
-                deleteMultiTimeOut = false;
-              }
-            }, 4000);
+          if (Object.keys(multiplayerGames[room].players).length <= 0) {
+            clearInterval(multiplayerGames[room].interval);
+            delete multiplayerGames[room];
+            console.log("Multiplayer game and interval instance terminated!");
           }
         }
       }
@@ -170,7 +159,6 @@ io.on("connection", (socket) => {
       multiplayerGames[room].colours.push(
         multiplayerGames[room].players[userName].snakeColour
       );
-      delete multiplayerGames[room].players[userName];
       socket.emit("player-died");
     }
   });
@@ -249,7 +237,6 @@ function reduceGamestate(oldGamestate, newGamestate, sendSegments) {
       if (!reducedGamestate.powerupPos) {
         reducedGamestate.powerupPos = [];
       }
-      console.log("Eaten")
       reducedGamestate.powerupPos[oldPowerupIndex] = "used"
     }
   });

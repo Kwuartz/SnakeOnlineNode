@@ -78,6 +78,7 @@ socket.on("player-died", () => {
   }).then(() => {
     console.log
     socket.emit("player-respawn", "multiplayer")
+    localPlayerDead = false
   })
 })
 

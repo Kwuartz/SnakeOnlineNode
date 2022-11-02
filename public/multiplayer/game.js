@@ -2,8 +2,6 @@ const gameBoard = document.getElementById("game");
 
 const foodColour = "red";
 const foodLeafColour = "green";
-
-
 const speedPowerColour = "blue";
 
 let bg = "#79cf44";
@@ -32,6 +30,7 @@ let eat = new Audio("../assets/sounds/eat.mp3");
 let death = new Audio("../assets/sounds/death.mp3");
 
 let userName;
+let localPlayerDead = false
 
 socket.on("player-connected", (playerName) => {
   socket.emit("server-message", playerName + " has connected!");
@@ -229,7 +228,6 @@ function updateGamestate(currentState, newGamestate) {
     newGamestate.powerupPos.forEach((powerupPos, powerupIndex) => {
       // Some will have placeholder undefined values so I can indentify index of powerupPos to replace
       if (powerupPos) {
-        console.log(powerupPos)
         if (powerupPos == "used") {
           updatedState.powerupPos.splice(powerupIndex, 1)
         } else {
@@ -237,9 +235,6 @@ function updateGamestate(currentState, newGamestate) {
         }
       }
     });
-
-    // Checks if power ups were eaten
-
   }
 
   // Updating players whether the server has sent full player info or partial info
@@ -367,10 +362,12 @@ socket.on("new-gamestate", (newGamestate) => {
         drawGame(localGame);
       });
     } else {
-      death.play();
-      socket.emit("player-death");
-      socket.emit("server-message", userName + " has died!");
-      localGame.players[userName].dead = false;
+      if (!localPlayerDead) {
+        death.play();
+        socket.emit("player-death");
+        socket.emit("server-message", userName + " has died!");
+        localPlayerDead = true;
+      }
     }
 
     inputDelay = 800 / localGame.fps;
