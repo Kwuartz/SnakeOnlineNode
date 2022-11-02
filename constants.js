@@ -1,4 +1,4 @@
-const GRIDSIZE = 60;
+const GRIDSIZE = 45;
 const FPS = 10;
 const COLOURS = [
   "#C2272D", // Tomato

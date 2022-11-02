@@ -194,7 +194,7 @@ function playerChecks(player, game) {
   // Check if player is on food
   foodPos.forEach((food) => {
     if (headPos.x == food.x && headPos.y == food.y) {
-      player.newSegments += 5;
+      player.newSegments += 4;
       foodPos[foodPos.indexOf(food)] = generateFood(game);
     }
   });

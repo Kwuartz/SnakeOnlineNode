@@ -34,11 +34,8 @@ const {
 } = require("./gamelogic");
 
 const multiplayerPlayers = {};
-let multiplayerGame;
-let multiplayerRoom = "multiplayer";
+let multiplayerGames = {}
 let deleteMultiTimeOut = false;
-
-const singlePlayerGames = [];
 
 app.set("trust proxy", true);
 
@@ -54,10 +51,6 @@ app.get("/multiplayer", (req, res) => {
   res.sendFile(__dirname + "/public/multiplayer/index.html");
 });
 
-app.get("/singleplayer", (req, res) => {
-  res.sendFile(__dirname + "/public/singleplayer/index.html");
-});
-
 http.listen(port, () => {
   console.log("Listening on port: " + port);
 });
@@ -68,95 +61,96 @@ io.on("connection", (socket) => {
     if (Object.values(multiplayerPlayers).includes(userName)) {
       socket.emit("username-taken");
     } else {
-      if (!multiplayerGame) {
-        multiplayerGame = createGameState();
-        gameInterval(multiplayerRoom, multiplayerGame);
-        console.log(`New multiplayer game instance created!`);
+      let room
+      if (Object.keys(multiplayerGames).length == 0) {
+        room = "multi1"
+        multiplayerGames[room] = createGameState();
+        gameInterval(room, multiplayerGames[room]);
+        console.log(`New multiplayer game instance created: ${room}!`);
+        console.log("AAAAAA")
+      } else {
+        // Checking if games are full
+        for (gameRoom in multiplayerGames) {
+          if (Object.keys(multiplayerGames[gameRoom].players).length < 5) {
+            room = gameRoom
+            console.log(`${userName} has joined room ${room}!`)
+          }
+        }
+        if (!room) {
+          console.log(parseInt(Object.keys(multiplayerGames).length) + 1)
+          room = `multi${Object.keys(multiplayerGames).length + 1}`
+          multiplayerGames[room] = createGameState();
+          gameInterval(room, multiplayerGames[room]);
+          console.log(`New multiplayer game instance created: ${room}!`);
+        }
       }
 
-      socket.join(multiplayerRoom);
-      multiplayerPlayers[socket.id] = userName;
+      socket.join(room);
+      multiplayerPlayers[socket.id] = {}
+      multiplayerPlayers[socket.id].userName = userName;
+      multiplayerPlayers[socket.id].room = room
       console.log(userName + " has connected!");
       socket.emit("player-connected", userName);
-      multiplayerGame.players[userName] = createNewPlayer(multiplayerGame);
+      multiplayerGames[room].players[userName] = createNewPlayer(multiplayerGames[room]);
 
       // Sending the room the gamestate again each time a new player joins
-      let initialGamestate = { ...multiplayerGame };
+      let initialGamestate = { ...multiplayerGames[room] };
       delete initialGamestate.interval;
       delete initialGamestate.colours;
-      io.to(multiplayerRoom).emit("new-gamestate", initialGamestate);
+      io.to(room).emit("new-gamestate", initialGamestate);
     }
   });
 
-  socket.on("new-singleplayer", () => {
-    console.log("New single player game instance created!");
-    singlePlayerGames[socket.id] = createGameState();
-    singlePlayerGames[socket.id].players["player"] = createNewPlayer(
-      singlePlayerGames[socket.id]
-    );
-    gameInterval(socket.id, singlePlayerGames[socket.id]);
-    socket.emit("player-connected");
-
-    // Sending initial game state
-    let initialGamestate = { ...singlePlayerGames[socket.id] };
-    delete initialGamestate.interval;
-    delete initialGamestate.colours;
-    socket.emit("new-gamestate", initialGamestate);
-  });
 
   socket.on("player-respawn", (gameType) => {
     if (gameType == "multiplayer") {
-      userName = multiplayerPlayers[socket.id];
+      const userName = multiplayerPlayers[socket.id].userName;
+      const room = multiplayerPlayers[socket.id].room
       console.log(userName + " has respawned!");
-      if (multiplayerGame) {
-        multiplayerGame.players[userName] = createNewPlayer(multiplayerGame);
+      if (multiplayerGames[room]) {
+        multiplayerGames[room].players[userName] = createNewPlayer(multiplayerGames[room]);
 
-        let initialGamestate = { ...multiplayerGame };
+        let initialGamestate = { ...multiplayerGames[room] };
         delete initialGamestate.interval;
         delete initialGamestate.colours;
-        io.to(multiplayerRoom).emit("new-gamestate", initialGamestate);
+        io.to(room).emit("new-gamestate", initialGamestate);
       }
-    } else if (gameType == "singleplayer") {
-      singlePlayerGames[socket.id].players["player"] = createNewPlayer(
-        singlePlayerGames[socket.id]
-      );
     }
   });
 
   socket.on("change-direction", (direction, gameType) => {
     if (gameType == "multiplayer") {
-      const userName = multiplayerPlayers[socket.id];
-      if (multiplayerGame.players) {
-        let player = multiplayerGame.players[userName];
+      const userName = multiplayerPlayers[socket.id].userName;
+      const room = multiplayerPlayers[socket.id].room
+      if (multiplayerGames[room].players) {
+        let player = multiplayerGames[room].players[userName];
         player = changeDirection(direction, player);
       }
-    } else if (gameType == "singleplayer") {
-      let player = singlePlayerGames[socket.id].players["player"];
-      player = changeDirection(direction, player);
     }
   });
 
   socket.on("disconnect", () => {
     console.log("Player " + socket.id + " disconnected");
-    if (multiplayerGame) {
-      const userName = multiplayerPlayers[socket.id];
+    const room = multiplayerPlayers[socket.id].room
+    if (multiplayerGames[room]) {
+      const userName = multiplayerPlayers[socket.id].userName;
       if (userName) {
-        if (multiplayerGame.players[userName]) {
-          multiplayerGame.colours.push(
-            multiplayerGame.players[userName].snakeColour
+        if (multiplayerGames[room].players[userName]) {
+          multiplayerGames[room].colours.push(
+            multiplayerGames[room].players[userName].snakeColour
           );
-          delete multiplayerGame.players[userName];
+          delete multiplayerGames[room].players[userName];
         }
         delete multiplayerPlayers[socket.id];
         if (
           deleteMultiTimeOut == false &&
-          Object.keys(multiplayerGame.players).length <= 0
+          Object.keys(multiplayerGames[room].players).length <= 0
         ) {
           deleteMultiTimeOut = true;
           setTimeout(() => {
-            if (Object.keys(multiplayerGame.players).length <= 0) {
-              clearInterval(multiplayerGame.interval);
-              multiplayerGame = undefined;
+            if (Object.keys(multiplayerGames[room].players).length <= 0) {
+              clearInterval(multiplayerGames[room].interval);
+              delete multiplayerGames[room];
               console.log("Multiplayer game and interval instance terminated!");
             } else {
               deleteMultiTimeOut = false;
@@ -164,39 +158,32 @@ io.on("connection", (socket) => {
           }, 10000);
         }
       }
-    } else if (singlePlayerGames[socket.id]) {
-      delete singlePlayerGames[socket.id];
-      console.log("Single player game instance terminated!");
     }
   });
 
   // Kills player when they have died
-  socket.on("player-death", (gameType) => {
-    if (gameType == "multiplayer") {
-      userName = multiplayerPlayers[socket.id];
-      if (userName && multiplayerGame.players[userName]) {
-        multiplayerGame.colours.push(
-          multiplayerGame.players[userName].snakeColour
-        );
-        delete multiplayerGame.players[userName];
-        socket.emit("player-died");
-      }
-    } else if (gameType == "singleplayer") {
-      delete singlePlayerGames[socket.id].players["player"];
+  socket.on(("player-death"), () => {
+    const room = multiplayerPlayers[socket.id].room
+    const userName = multiplayerPlayers[socket.id].userName;
+    if (userName && multiplayerGames[room].players[userName]) {
+      multiplayerGames[room].colours.push(
+        multiplayerGames[room].players[userName].snakeColour
+      );
+      delete multiplayerGames[room].players[userName];
       socket.emit("player-died");
     }
   });
 
   socket.on("chat-message", (message) => {
-    username = multiplayerPlayers[socket.id];
-
+    const username = multiplayerPlayers[socket.id];
+    const room = multiplayerPlayers[socket.id].room
     if (message == "party") {
-      if (multiplayerGame.party) {
-        multiplayerGame.party = false;
-        io.to(multiplayerRoom).emit("party", false)
+      if (multiplayerGames[room].party) {
+        multiplayerGames[room].party = false;
+        io.to(room).emit("party", false)
       } else {
-        multiplayerGame.party = true;
-        io.to(multiplayerRoom).emit("party", true)
+        multiplayerGames[room].party = true;
+        io.to(room).emit("party", true)
       }
     }
 
@@ -204,7 +191,7 @@ io.on("connection", (socket) => {
       "message-recieved",
       message,
       username,
-      multiplayerGame.players[username].snakeColour
+      multiplayerGames[room].players[username].snakeColour
     );
   });
 
@@ -322,7 +309,7 @@ function partyInterval(room, gamestate) {
       reducedGamestate = reduceGamestate(oldGamestate, gamestate, false);
       lastFullState--;
     } else {
-      reducedGamestate = reduceGamestate(oldGamestate, gamestate, false);
+      reducedGamestate = reduceGamestate(oldGamestate, gamestate, true);
       lastFullState = gamestate.fps * 10;
     }
 

@@ -99,7 +99,6 @@ function drawGame(game) {
 
   for (username in game.players) {
     let snake = game.players[username];
-
     drawSnake(game.players[username], size);
     // Only draws score of local player
     if (username == userName) {
@@ -111,6 +110,7 @@ function drawGame(game) {
       );
     }
   }
+    
 
   if (game.party) {
     if (lastBgChange < Date.now() - bgDelay) {
@@ -126,7 +126,7 @@ function drawSnake(snake, size) {
   if (!snake.dead) {
     snake.segments.forEach((segment, _) => {
       context.fillStyle = snake.snakeColour;
-      context.fillRect(segment.x * size, segment.y * size, size, size);
+      context.fillRect((segment.x) * size, (segment.y) * size, size, size);
       // Eyes
       if (segment.x == snake.headPos.x && segment.y == snake.headPos.y) {
         context.fillStyle = "white";
@@ -368,7 +368,7 @@ socket.on("new-gamestate", (newGamestate) => {
       });
     } else {
       death.play();
-      socket.emit("player-death", "multiplayer");
+      socket.emit("player-death");
       socket.emit("server-message", userName + " has died!");
       localGame.players[userName].dead = false;
     }
